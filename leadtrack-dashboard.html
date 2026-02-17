@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeadTrack Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #f5f0e8; --cream2: #ede7d9; --cream3: #e0d8c8;
+      --brown: #2c1f14; --brown2: #4a3728; --brown3: #7a5c46; --muted: #9c8472;
+      --accent: #c4622d; --accent2: #e8956d; --accent-light: #fdf0e8;
+      --white: #fdfaf5; --border: rgba(44,31,20,0.10); --border2: rgba(44,31,20,0.06);
+      --green: #2d7a4a; --green-bg: #e8f5ee;
+      --yellow: #a07a10; --yellow-bg: #fef9e7;
+      --red: #9b2c2c; --red-bg: #fdf0f0;
+      --blue: #2c4a7a; --blue-bg: #e8f0fd;
+      --font-d: 'Fraunces', serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+      --ease: cubic-bezier(0.22,1,0.36,1);
+      --shadow: 0 4px 24px rgba(44,31,20,0.08);
+      --shadow-md: 0 8px 32px rgba(44,31,20,0.12);
+    }
+    html, body, #root { height: 100%; }
+    body { font-family: var(--font-b); background: var(--cream); color: var(--brown); line-height: 1.6; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--cream2); }
+    ::-webkit-scrollbar-thumb { background: var(--brown3); border-radius: 99px; }
+    button { font-family: var(--font-b); cursor: pointer; border: none; outline: none; }
+    input, select, textarea { font-family: var(--font-b); outline: none; }
+    * { transition: opacity 0.2s, transform 0.2s var(--ease); }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ─── SEED DATA ─── */
+const SEED = [
+  { id:1, name:'Riya Sharma',    email:'riya@growfast.in',   phone:'9876543210', company:'GrowFast Agency',   status:'Converted', source:'LinkedIn',  value:45000, date:'2024-11-02', notes:'Interested in full website rebuild' },
+  { id:2, name:'Arjun Mehta',    email:'arjun@brandkraft.co',phone:'9812345678', company:'BrandKraft',        status:'Contacted', source:'Referral',  value:28000, date:'2024-11-08', notes:'Follow up Monday' },
+  { id:3, name:'Sneha Patel',    email:'sneha@novadigital.in',phone:'9900112233', company:'Nova Digital',      status:'New',       source:'Website',   value:62000, date:'2024-11-14', notes:'Needs landing page + CRM integration' },
+  { id:4, name:'Karan Singh',    email:'karan@pixelops.io',  phone:'9988776655', company:'PixelOps',          status:'Converted', source:'LinkedIn',  value:38000, date:'2024-10-28', notes:'Repeat client - happy with work' },
+  { id:5, name:'Meera Nair',     email:'meera@launchpad.in', phone:'9123456789', company:'Launchpad Studio',  status:'New',       source:'Instagram', value:19000, date:'2024-11-15', notes:'Startup landing page' },
+  { id:6, name:'Rohit Verma',    email:'rohit@clearmark.com',phone:'9871234560', company:'ClearMark',         status:'Contacted', source:'Cold Email',value:33000, date:'2024-11-10', notes:'Awaiting proposal review' },
+  { id:7, name:'Ananya Joshi',   email:'ananya@trueblue.co', phone:'9765432109', company:'TrueBlue',          status:'Lost',      source:'Website',   value:22000, date:'2024-11-01', notes:'Went with another vendor' },
+  { id:8, name:'Dev Kapoor',     email:'dev@springworks.in', phone:'9654321098', company:'SpringWorks',       status:'Converted', source:'Referral',  value:55000, date:'2024-10-20', notes:'Dashboard + backend project' },
+];
+
+const STATUS_ORDER = ['New','Contacted','Converted','Lost'];
+const STATUS_COLORS = { New: { bg:'var(--blue-bg)', color:'var(--blue)', dot:'#2c4a7a' }, Contacted: { bg:'var(--yellow-bg)', color:'var(--yellow)', dot:'#a07a10' }, Converted: { bg:'var(--green-bg)', color:'var(--green)', dot:'#2d7a4a' }, Lost: { bg:'var(--red-bg)', color:'var(--red)', dot:'#9b2c2c' } };
+const SOURCES = ['Website','LinkedIn','Referral','Instagram','Cold Email','Other'];
+
+/* ─── UTILS ─── */
+const fmt = n => '₹' + (n||0).toLocaleString('en-IN');
+const fmtDate = d => new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+/* ─── STATUS BADGE ─── */
+const Badge = ({ status }) => {
+  const s = STATUS_COLORS[status] || STATUS_COLORS.New;
+  return (
+    <span style={{ display:'inline-flex', alignItems:'center', gap:5, background:s.bg, color:s.color, fontSize:'0.7rem', fontWeight:600, padding:'3px 9px', borderRadius:99, letterSpacing:'0.04em' }}>
+      <span style={{ width:5, height:5, borderRadius:'50%', background:s.dot, display:'inline-block' }}></span>
+      {status}
+    </span>
+  );
+};
+
+/* ─── LOGIN SCREEN ─── */
+const Login = ({ onLogin }) => {
+  const [email, setEmail] = useState('');
+  const [pass, setPass]   = useState('');
+  const [err, setErr]     = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handle = (e) => {
+    e.preventDefault();
+    setLoading(true); setErr('');
+    setTimeout(() => {
+      if (email === 'vasu@agency.com' && pass === 'leadtrack123') {
+        onLogin({ name: 'Vasu', email });
+      } else {
+        setErr('Invalid credentials. Try vasu@agency.com / leadtrack123');
+        setLoading(false);
+      }
+    }, 900);
+  };
+
+  return (
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:`linear-gradient(145deg, #2c1f14 0%, #4a3728 50%, #7a5c46 100%)`, padding:'2rem', position:'relative', overflow:'hidden' }}>
+      {/* decorative rings */}
+      <svg style={{ position:'absolute', top:'-80px', right:'-80px', opacity:0.07 }} width="400" height="400" viewBox="0 0 400 400">
+        <circle cx="200" cy="200" r="190" stroke="white" strokeWidth="1" fill="none"/>
+        <circle cx="200" cy="200" r="130" stroke="white" strokeWidth="1" fill="none"/>
+        <circle cx="200" cy="200" r="70" stroke="white" strokeWidth="1" fill="none"/>
+      </svg>
+      <svg style={{ position:'absolute', bottom:'-60px', left:'-60px', opacity:0.05 }} width="300" height="300" viewBox="0 0 300 300">
+        <circle cx="150" cy="150" r="140" stroke="white" strokeWidth="1" fill="none"/>
+      </svg>
+
+      <div style={{ background:'var(--white)', borderRadius:20, padding:'2.8rem', width:'100%', maxWidth:400, boxShadow:'0 32px 80px rgba(0,0,0,0.25)' }}>
+        <div style={{ marginBottom:'2rem' }}>
+          <div style={{ fontFamily:'var(--font-d)', fontSize:'1.6rem', fontWeight:400, fontStyle:'italic', color:'var(--brown)', marginBottom:'0.3rem' }}>
+            LeadTrack <span style={{ color:'var(--accent)' }}>Pro</span>
+          </div>
+          <p style={{ fontSize:'0.82rem', color:'var(--muted)', fontWeight:300 }}>Sign in to your dashboard</p>
+        </div>
+
+        <form onSubmit={handle}>
+          <div style={{ marginBottom:'1rem' }}>
+            <label style={{ display:'block', fontSize:'0.72rem', fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.4rem' }}>Email</label>
+            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="vasu@agency.com" type="email" required
+              style={{ width:'100%', padding:'0.75rem 1rem', borderRadius:10, border:'1.5px solid var(--border)', background:'var(--cream)', fontSize:'0.875rem', color:'var(--brown)' }} />
+          </div>
+          <div style={{ marginBottom:'1.5rem' }}>
+            <label style={{ display:'block', fontSize:'0.72rem', fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.4rem' }}>Password</label>
+            <input value={pass} onChange={e=>setPass(e.target.value)} placeholder="••••••••" type="password" required
+              style={{ width:'100%', padding:'0.75rem 1rem', borderRadius:10, border:'1.5px solid var(--border)', background:'var(--cream)', fontSize:'0.875rem', color:'var(--brown)' }} />
+          </div>
+          {err && <div style={{ background:'var(--red-bg)', color:'var(--red)', fontSize:'0.78rem', padding:'0.6rem 0.9rem', borderRadius:8, marginBottom:'1rem', fontWeight:500 }}>{err}</div>}
+          <button type="submit" disabled={loading}
+            style={{ width:'100%', padding:'0.88rem', borderRadius:99, background: loading ? 'var(--brown3)' : 'var(--brown)', color:'var(--cream)', fontSize:'0.875rem', fontWeight:600, letterSpacing:'0.01em' }}>
+            {loading ? 'Signing in…' : 'Sign in →'}
+          </button>
+        </form>
+        <p style={{ fontSize:'0.72rem', color:'var(--muted)', textAlign:'center', marginTop:'1.2rem', fontWeight:300 }}>Demo: vasu@agency.com / leadtrack123</p>
+      </div>
+    </div>
+  );
+};
+
+/* ─── CHART COMPONENT ─── */
+const BarChart = ({ leads }) => {
+  const ref = useRef(null);
+  const chart = useRef(null);
+
+  useEffect(() => {
+    const months = {};
+    leads.forEach(l => {
+      const m = new Date(l.date).toLocaleDateString('en-IN',{month:'short'});
+      months[m] = (months[m]||0) + 1;
+    });
+    const labels = Object.keys(months);
+    const data   = Object.values(months);
+
+    if (chart.current) chart.current.destroy();
+    chart.current = new Chart(ref.current, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: labels.map((_,i) => i === labels.length-1 ? '#c4622d' : '#e0d8c8'),
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} leads` } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 }, color: '#9c8472' } },
+          y: { grid: { color: 'rgba(44,31,20,0.05)' }, ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 11 }, color: '#9c8472' } }
+        }
+      }
+    });
+    return () => { if (chart.current) chart.current.destroy(); };
+  }, [leads]);
+
+  return <canvas ref={ref} />;
+};
+
+const DonutChart = ({ leads }) => {
+  const ref = useRef(null);
+  const chart = useRef(null);
+
+  useEffect(() => {
+    const counts = {};
+    STATUS_ORDER.forEach(s => counts[s] = 0);
+    leads.forEach(l => counts[l.status] = (counts[l.status]||0) + 1);
+    if (chart.current) chart.current.destroy();
+    chart.current = new Chart(ref.current, {
+      type: 'doughnut',
+      data: {
+        labels: STATUS_ORDER,
+        datasets: [{ data: STATUS_ORDER.map(s=>counts[s]), backgroundColor: ['#2c4a7a','#c4a010','#2d7a4a','#9b2c2c'], borderWidth: 0, hoverOffset: 4 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '70%',
+        plugins: { legend: { position:'bottom', labels: { font: { family:'Plus Jakarta Sans', size:11 }, color:'#7a5c46', padding: 14, boxWidth: 10, boxHeight: 10 } } }
+      }
+    });
+    return () => { if (chart.current) chart.current.destroy(); };
+  }, [leads]);
+
+  return <canvas ref={ref} />;
+};
+
+/* ─── ADD / EDIT MODAL ─── */
+const Modal = ({ lead, onSave, onClose }) => {
+  const empty = { name:'', email:'', phone:'', company:'', status:'New', source:'Website', value:'', date: new Date().toISOString().split('T')[0], notes:'' };
+  const [form, setForm] = useState(lead || empty);
+  const set = (k,v) => setForm(f => ({...f, [k]:v}));
+
+  const inputStyle = { width:'100%', padding:'0.7rem 0.9rem', borderRadius:8, border:'1.5px solid var(--border)', background:'var(--cream)', fontSize:'0.845rem', color:'var(--brown)', fontFamily:'var(--font-b)' };
+  const labelStyle = { display:'block', fontSize:'0.68rem', fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.35rem' };
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(44,31,20,0.45)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem', backdropFilter:'blur(4px)' }}
+      onClick={e => { if(e.target===e.currentTarget) onClose(); }}>
+      <div style={{ background:'var(--white)', borderRadius:18, padding:'2rem', width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 24px 64px rgba(44,31,20,0.2)' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.8rem' }}>
+          <h3 style={{ fontFamily:'var(--font-d)', fontSize:'1.3rem', fontWeight:400, fontStyle:'italic', color:'var(--brown)' }}>{lead ? 'Edit Lead' : 'Add New Lead'}</h3>
+          <button onClick={onClose} style={{ width:32, height:32, borderRadius:99, background:'var(--cream2)', color:'var(--brown3)', fontSize:'1rem', display:'flex', alignItems:'center', justifyContent:'center' }}>×</button>
+        </div>
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
+          {[['name','Name','text'],['email','Email','email'],['phone','Phone','tel'],['company','Company','text']].map(([k,l,t]) => (
+            <div key={k} style={k==='email'||k==='company'?{gridColumn:'span 2'}:{}}>
+              <label style={labelStyle}>{l}</label>
+              <input type={t} value={form[k]} onChange={e=>set(k,e.target.value)} style={inputStyle} placeholder={l} />
+            </div>
+          ))}
+          <div>
+            <label style={labelStyle}>Status</label>
+            <select value={form.status} onChange={e=>set('status',e.target.value)} style={inputStyle}>
+              {STATUS_ORDER.map(s=><option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Source</label>
+            <select value={form.source} onChange={e=>set('source',e.target.value)} style={inputStyle}>
+              {SOURCES.map(s=><option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Deal Value (₹)</label>
+            <input type="number" value={form.value} onChange={e=>set('value',e.target.value)} style={inputStyle} placeholder="0" />
+          </div>
+          <div>
+            <label style={labelStyle}>Date</label>
+            <input type="date" value={form.date} onChange={e=>set('date',e.target.value)} style={inputStyle} />
+          </div>
+          <div style={{ gridColumn:'span 2' }}>
+            <label style={labelStyle}>Notes</label>
+            <textarea value={form.notes} onChange={e=>set('notes',e.target.value)} rows={3}
+              style={{ ...inputStyle, resize:'vertical' }} placeholder="Any notes about this lead…" />
+          </div>
+        </div>
+
+        <div style={{ display:'flex', gap:'0.75rem', marginTop:'1.8rem' }}>
+          <button onClick={() => onSave({ ...form, value: Number(form.value)||0, id: form.id || Date.now() })}
+            style={{ flex:1, padding:'0.85rem', borderRadius:99, background:'var(--brown)', color:'var(--cream)', fontSize:'0.85rem', fontWeight:600 }}>
+            {lead ? 'Save Changes' : 'Add Lead'} →
+          </button>
+          <button onClick={onClose}
+            style={{ padding:'0.85rem 1.5rem', borderRadius:99, background:'var(--cream2)', color:'var(--brown3)', fontSize:'0.85rem', fontWeight:500 }}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── MAIN APP ─── */
+const App = () => {
+  const [user, setUser]       = useState(null);
+  const [leads, setLeads]     = useState(SEED);
+  const [view, setView]       = useState('dashboard'); // dashboard | leads | analytics
+  const [modal, setModal]     = useState(null); // null | 'add' | lead obj
+  const [search, setSearch]   = useState('');
+  const [filterStatus, setFS] = useState('All');
+  const [toast, setToast]     = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  const showToast = (msg, type='success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const saveLead = (lead) => {
+    if (leads.find(l => l.id === lead.id)) {
+      setLeads(ls => ls.map(l => l.id===lead.id ? lead : l));
+      showToast('Lead updated successfully');
+    } else {
+      setLeads(ls => [lead, ...ls]);
+      showToast('Lead added successfully');
+    }
+    setModal(null);
+  };
+
+  const deleteLead = (id) => {
+    setLeads(ls => ls.filter(l => l.id !== id));
+    setDeleteConfirm(null);
+    showToast('Lead deleted', 'error');
+  };
+
+  const changeStatus = (id, status) => {
+    setLeads(ls => ls.map(l => l.id===id ? {...l, status} : l));
+    showToast(`Status updated to ${status}`);
+  };
+
+  if (!user) return <Login onLogin={setUser} />;
+
+  /* stats */
+  const total     = leads.length;
+  const converted = leads.filter(l=>l.status==='Converted').length;
+  const pipeline  = leads.filter(l=>l.status==='New'||l.status==='Contacted').reduce((a,l)=>a+l.value,0);
+  const revenue   = leads.filter(l=>l.status==='Converted').reduce((a,l)=>a+l.value,0);
+  const convRate  = total ? Math.round((converted/total)*100) : 0;
+
+  const filtered  = leads.filter(l => {
+    const q = search.toLowerCase();
+    const matchQ = !q || l.name.toLowerCase().includes(q) || l.company.toLowerCase().includes(q) || l.email.toLowerCase().includes(q);
+    const matchS = filterStatus==='All' || l.status===filterStatus;
+    return matchQ && matchS;
+  });
+
+  /* ── SIDEBAR ── */
+  const navItems = [
+    { id:'dashboard', icon:'◈', label:'Dashboard' },
+    { id:'leads',     icon:'◉', label:'All Leads' },
+    { id:'analytics', icon:'▲', label:'Analytics' },
+  ];
+
+  const sidebarW = 220;
+
+  /* ── STYLES ── */
+  const card = { background:'var(--white)', border:'1px solid var(--border)', borderRadius:14, padding:'1.4rem 1.5rem', boxShadow:'var(--shadow)' };
+  const statCard = (accent) => ({ ...card, borderTop:`3px solid ${accent}` });
+
+  return (
+    <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'var(--cream)' }}>
+
+      {/* SIDEBAR */}
+      <aside style={{ width:sidebarW, background:'var(--brown)', display:'flex', flexDirection:'column', flexShrink:0, padding:'1.6rem 1rem' }}>
+        <div style={{ fontFamily:'var(--font-d)', fontSize:'1.2rem', fontWeight:400, fontStyle:'italic', color:'var(--cream)', marginBottom:'2.5rem', paddingLeft:'0.5rem' }}>
+          Lead<span style={{ color:'var(--accent2)' }}>Track</span>
+        </div>
+
+        <nav style={{ flex:1 }}>
+          {navItems.map(n => (
+            <button key={n.id} onClick={() => setView(n.id)}
+              style={{ width:'100%', display:'flex', alignItems:'center', gap:'0.75rem', padding:'0.7rem 0.9rem', borderRadius:10, marginBottom:'0.25rem', background: view===n.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: view===n.id ? 'var(--cream)' : 'rgba(245,240,232,0.45)', fontSize:'0.82rem', fontWeight: view===n.id ? 600 : 400, textAlign:'left', letterSpacing:'0.01em' }}>
+              <span style={{ fontSize:'0.75rem', opacity:0.8 }}>{n.icon}</span>
+              {n.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* user */}
+        <div style={{ padding:'0.9rem', borderRadius:10, background:'rgba(255,255,255,0.07)', marginTop:'auto' }}>
+          <div style={{ fontSize:'0.8rem', fontWeight:600, color:'var(--cream)', marginBottom:2 }}>{user.name}</div>
+          <div style={{ fontSize:'0.68rem', color:'rgba(245,240,232,0.4)', marginBottom:'0.7rem' }}>{user.email}</div>
+          <button onClick={() => setUser(null)}
+            style={{ fontSize:'0.7rem', color:'rgba(245,240,232,0.45)', background:'transparent', letterSpacing:'0.05em' }}>
+            Sign out →
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN */}
+      <main style={{ flex:1, overflowY:'auto', padding:'2rem' }}>
+
+        {/* ── DASHBOARD ── */}
+        {view === 'dashboard' && (
+          <div>
+            <div style={{ marginBottom:'2rem' }}>
+              <h1 style={{ fontFamily:'var(--font-d)', fontSize:'1.8rem', fontWeight:300, fontStyle:'italic', color:'var(--brown)' }}>Good morning, <span style={{ color:'var(--accent)' }}>{user.name}</span></h1>
+              <p style={{ fontSize:'0.82rem', color:'var(--muted)', fontWeight:300, marginTop:4 }}>Here's what's happening with your leads today.</p>
+            </div>
+
+            {/* stat cards */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:'1rem', marginBottom:'1.5rem' }}>
+              {[
+                { label:'Total Leads', val: total, accent:'var(--brown3)', sub: 'All time' },
+                { label:'Converted', val: converted, accent:'var(--green)', sub: `${convRate}% rate` },
+                { label:'In Pipeline', val: fmt(pipeline), accent:'var(--accent)', sub: `${leads.filter(l=>l.status==='New'||l.status==='Contacted').length} active` },
+                { label:'Revenue Won', val: fmt(revenue), accent:'var(--blue)', sub: 'Closed deals' },
+              ].map(s => (
+                <div key={s.label} style={statCard(s.accent)}>
+                  <div style={{ fontSize:'0.68rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.7rem' }}>{s.label}</div>
+                  <div style={{ fontFamily:'var(--font-d)', fontSize:'1.7rem', fontWeight:300, fontStyle:'italic', color:'var(--brown)', lineHeight:1 }}>{s.val}</div>
+                  <div style={{ fontSize:'0.72rem', color:'var(--muted)', marginTop:'0.4rem', fontWeight:300 }}>{s.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* pipeline kanban */}
+            <div style={{ ...card, marginBottom:'1.5rem' }}>
+              <div style={{ fontSize:'0.72rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'1.2rem' }}>Pipeline</div>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'0.75rem' }}>
+                {STATUS_ORDER.map(s => {
+                  const sc = STATUS_COLORS[s];
+                  const sLeads = leads.filter(l=>l.status===s);
+                  return (
+                    <div key={s} style={{ background: sc.bg, borderRadius:10, padding:'1rem' }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:'0.8rem' }}>
+                        <span style={{ width:7, height:7, borderRadius:'50%', background:sc.dot, display:'inline-block' }}></span>
+                        <span style={{ fontSize:'0.7rem', fontWeight:700, color:sc.color, letterSpacing:'0.06em', textTransform:'uppercase' }}>{s}</span>
+                        <span style={{ marginLeft:'auto', fontFamily:'var(--font-d)', fontSize:'1.1rem', fontStyle:'italic', color:sc.color }}>{sLeads.length}</span>
+                      </div>
+                      {sLeads.slice(0,3).map(l => (
+                        <div key={l.id} style={{ background:'var(--white)', borderRadius:7, padding:'0.6rem 0.75rem', marginBottom:'0.4rem', fontSize:'0.75rem' }}>
+                          <div style={{ fontWeight:600, color:'var(--brown)', marginBottom:2 }}>{l.name}</div>
+                          <div style={{ color:'var(--muted)', fontWeight:300, fontSize:'0.7rem' }}>{l.company}</div>
+                        </div>
+                      ))}
+                      {sLeads.length > 3 && <div style={{ fontSize:'0.68rem', color:sc.color, fontWeight:500, textAlign:'center', marginTop:4 }}>+{sLeads.length-3} more</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* recent leads table */}
+            <div style={card}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.2rem' }}>
+                <div style={{ fontSize:'0.72rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)' }}>Recent Leads</div>
+                <button onClick={() => setView('leads')} style={{ fontSize:'0.75rem', color:'var(--accent)', background:'transparent', fontWeight:500 }}>View all →</button>
+              </div>
+              <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom:'1px solid var(--border)' }}>
+                    {['Name','Company','Status','Value','Date'].map(h => (
+                      <th key={h} style={{ textAlign:'left', padding:'0.5rem 0.75rem', fontSize:'0.67rem', fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--muted)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {leads.slice(0,5).map(l => (
+                    <tr key={l.id} style={{ borderBottom:'1px solid var(--border2)' }}>
+                      <td style={{ padding:'0.7rem 0.75rem' }}>
+                        <div style={{ fontSize:'0.82rem', fontWeight:600, color:'var(--brown)' }}>{l.name}</div>
+                        <div style={{ fontSize:'0.7rem', color:'var(--muted)', fontWeight:300 }}>{l.email}</div>
+                      </td>
+                      <td style={{ padding:'0.7rem 0.75rem', fontSize:'0.82rem', color:'var(--brown2)' }}>{l.company}</td>
+                      <td style={{ padding:'0.7rem 0.75rem' }}><Badge status={l.status} /></td>
+                      <td style={{ padding:'0.7rem 0.75rem', fontSize:'0.82rem', color:'var(--brown)', fontWeight:500 }}>{fmt(l.value)}</td>
+                      <td style={{ padding:'0.7rem 0.75rem', fontSize:'0.78rem', color:'var(--muted)', fontWeight:300 }}>{fmtDate(l.date)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ── ALL LEADS ── */}
+        {view === 'leads' && (
+          <div>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.8rem', flexWrap:'wrap', gap:'1rem' }}>
+              <div>
+                <h1 style={{ fontFamily:'var(--font-d)', fontSize:'1.8rem', fontWeight:300, fontStyle:'italic', color:'var(--brown)' }}>All <span style={{ color:'var(--accent)' }}>Leads</span></h1>
+                <p style={{ fontSize:'0.8rem', color:'var(--muted)', fontWeight:300, marginTop:3 }}>{filtered.length} of {total} leads</p>
+              </div>
+              <button onClick={() => setModal('add')}
+                style={{ display:'flex', alignItems:'center', gap:6, padding:'0.75rem 1.4rem', borderRadius:99, background:'var(--brown)', color:'var(--cream)', fontSize:'0.82rem', fontWeight:600, boxShadow:'var(--shadow)' }}>
+                + Add Lead
+              </button>
+            </div>
+
+            {/* search & filter */}
+            <div style={{ display:'flex', gap:'0.75rem', marginBottom:'1.2rem', flexWrap:'wrap' }}>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search leads…"
+                style={{ flex:1, minWidth:200, padding:'0.65rem 1rem', borderRadius:99, border:'1.5px solid var(--border)', background:'var(--white)', fontSize:'0.82rem', color:'var(--brown)' }} />
+              {['All',...STATUS_ORDER].map(s => (
+                <button key={s} onClick={() => setFS(s)}
+                  style={{ padding:'0.55rem 1.1rem', borderRadius:99, border:`1.5px solid ${filterStatus===s ? 'var(--brown)' : 'var(--border)'}`, background: filterStatus===s ? 'var(--brown)' : 'transparent', color: filterStatus===s ? 'var(--cream)' : 'var(--muted)', fontSize:'0.78rem', fontWeight:500 }}>
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            {/* cards */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:'1rem' }}>
+              {filtered.map(l => (
+                <div key={l.id} style={{ ...card, position:'relative' }}>
+                  <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'0.8rem' }}>
+                    <div>
+                      <div style={{ fontSize:'0.9rem', fontWeight:600, color:'var(--brown)' }}>{l.name}</div>
+                      <div style={{ fontSize:'0.75rem', color:'var(--muted)', fontWeight:300 }}>{l.company}</div>
+                    </div>
+                    <Badge status={l.status} />
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.5rem', marginBottom:'0.9rem' }}>
+                    {[['✉', l.email],['☎', l.phone],['◎', l.source],['₹', fmt(l.value)]].map(([ic,v],i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'center', gap:5, fontSize:'0.74rem', color:'var(--muted)', fontWeight:300 }}>
+                        <span style={{ fontSize:'0.7rem', opacity:0.6 }}>{ic}</span> {v}
+                      </div>
+                    ))}
+                  </div>
+                  {l.notes && <div style={{ fontSize:'0.74rem', color:'var(--muted)', fontStyle:'italic', fontWeight:300, background:'var(--cream)', borderRadius:6, padding:'0.5rem 0.7rem', marginBottom:'0.9rem' }}>{l.notes}</div>}
+
+                  {/* status changer */}
+                  <div style={{ display:'flex', gap:'0.3rem', flexWrap:'wrap', marginBottom:'0.9rem' }}>
+                    {STATUS_ORDER.filter(s=>s!==l.status).map(s => (
+                      <button key={s} onClick={() => changeStatus(l.id,s)}
+                        style={{ padding:'0.25rem 0.6rem', borderRadius:99, border:'1px solid var(--border)', background:'transparent', fontSize:'0.68rem', color:'var(--muted)', fontWeight:500 }}>
+                        → {s}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div style={{ display:'flex', gap:'0.5rem', paddingTop:'0.8rem', borderTop:'1px solid var(--border2)' }}>
+                    <button onClick={() => setModal(l)}
+                      style={{ flex:1, padding:'0.55rem', borderRadius:8, background:'var(--cream2)', color:'var(--brown3)', fontSize:'0.75rem', fontWeight:500 }}>
+                      Edit
+                    </button>
+                    <button onClick={() => setDeleteConfirm(l.id)}
+                      style={{ padding:'0.55rem 0.8rem', borderRadius:8, background:'var(--red-bg)', color:'var(--red)', fontSize:'0.75rem', fontWeight:500 }}>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {filtered.length === 0 && (
+                <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'4rem', color:'var(--muted)', fontSize:'0.9rem', fontWeight:300 }}>
+                  No leads found. <button onClick={()=>setModal('add')} style={{ color:'var(--accent)', background:'transparent', fontWeight:500 }}>Add one?</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── ANALYTICS ── */}
+        {view === 'analytics' && (
+          <div>
+            <div style={{ marginBottom:'2rem' }}>
+              <h1 style={{ fontFamily:'var(--font-d)', fontSize:'1.8rem', fontWeight:300, fontStyle:'italic', color:'var(--brown)' }}>Analytics <span style={{ color:'var(--accent)' }}>Overview</span></h1>
+              <p style={{ fontSize:'0.82rem', color:'var(--muted)', fontWeight:300, marginTop:4 }}>Performance metrics at a glance.</p>
+            </div>
+
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:'1rem', marginBottom:'1.5rem' }}>
+              {[
+                { label:'Conversion Rate', val:`${convRate}%`, note:`${converted} of ${total}` },
+                { label:'Avg Deal Size',   val: total ? fmt(Math.round(leads.reduce((a,l)=>a+l.value,0)/total)) : '₹0', note:'All leads' },
+                { label:'Top Source',      val: (() => { const c={}; leads.forEach(l=>c[l.source]=(c[l.source]||0)+1); return Object.entries(c).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—'; })(), note:'Most leads' },
+                { label:'Lost Leads',      val: leads.filter(l=>l.status==='Lost').length, note: `${total ? Math.round((leads.filter(l=>l.status==='Lost').length/total)*100) : 0}% of total` },
+              ].map(s => (
+                <div key={s.label} style={card}>
+                  <div style={{ fontSize:'0.68rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.7rem' }}>{s.label}</div>
+                  <div style={{ fontFamily:'var(--font-d)', fontSize:'1.7rem', fontWeight:300, fontStyle:'italic', color:'var(--brown)', lineHeight:1 }}>{s.val}</div>
+                  <div style={{ fontSize:'0.72rem', color:'var(--muted)', marginTop:'0.4rem', fontWeight:300 }}>{s.note}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:'1rem' }}>
+              <div style={{ ...card }}>
+                <div style={{ fontSize:'0.72rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'1.2rem' }}>Leads by Month</div>
+                <div style={{ height:220 }}><BarChart leads={leads} /></div>
+              </div>
+              <div style={{ ...card }}>
+                <div style={{ fontSize:'0.72rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'1.2rem' }}>Status Breakdown</div>
+                <div style={{ height:220 }}><DonutChart leads={leads} /></div>
+              </div>
+            </div>
+
+            {/* source table */}
+            <div style={{ ...card, marginTop:'1rem' }}>
+              <div style={{ fontSize:'0.72rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'1.2rem' }}>Leads by Source</div>
+              {(() => {
+                const src = {};
+                leads.forEach(l => { if(!src[l.source]) src[l.source]={count:0,value:0,converted:0}; src[l.source].count++; src[l.source].value+=l.value; if(l.status==='Converted') src[l.source].converted++; });
+                return Object.entries(src).sort((a,b)=>b[1].count-a[1].count).map(([s,d]) => (
+                  <div key={s} style={{ display:'flex', alignItems:'center', gap:'1rem', padding:'0.7rem 0', borderBottom:'1px solid var(--border2)' }}>
+                    <div style={{ width:90, fontSize:'0.82rem', fontWeight:500, color:'var(--brown)' }}>{s}</div>
+                    <div style={{ flex:1, height:6, background:'var(--cream2)', borderRadius:99, overflow:'hidden' }}>
+                      <div style={{ height:'100%', background:'var(--accent)', borderRadius:99, width:`${(d.count/total)*100}%` }}></div>
+                    </div>
+                    <div style={{ fontSize:'0.78rem', color:'var(--muted)', width:50, textAlign:'right' }}>{d.count} leads</div>
+                    <div style={{ fontSize:'0.78rem', color:'var(--green)', fontWeight:500, width:60, textAlign:'right' }}>{d.count ? Math.round((d.converted/d.count)*100) : 0}% conv.</div>
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* FAB on leads page */}
+      {view !== 'dashboard' && (
+        <button onClick={() => setModal('add')}
+          style={{ position:'fixed', bottom:'1.8rem', right:'1.8rem', width:50, height:50, borderRadius:'50%', background:'var(--accent)', color:'white', fontSize:'1.4rem', boxShadow:'0 8px 24px rgba(196,98,45,0.35)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:50 }}>
+          +
+        </button>
+      )}
+
+      {/* MODAL */}
+      {modal && <Modal lead={modal==='add' ? null : modal} onSave={saveLead} onClose={() => setModal(null)} />}
+
+      {/* DELETE CONFIRM */}
+      {deleteConfirm && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(44,31,20,0.45)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}>
+          <div style={{ background:'var(--white)', borderRadius:16, padding:'2rem', maxWidth:340, width:'90%', boxShadow:'var(--shadow-md)' }}>
+            <h3 style={{ fontFamily:'var(--font-d)', fontSize:'1.2rem', fontWeight:400, fontStyle:'italic', marginBottom:'0.7rem' }}>Delete this lead?</h3>
+            <p style={{ fontSize:'0.82rem', color:'var(--muted)', fontWeight:300, marginBottom:'1.5rem' }}>This action cannot be undone.</p>
+            <div style={{ display:'flex', gap:'0.75rem' }}>
+              <button onClick={() => deleteLead(deleteConfirm)} style={{ flex:1, padding:'0.75rem', borderRadius:99, background:'var(--red)', color:'white', fontSize:'0.82rem', fontWeight:600 }}>Delete</button>
+              <button onClick={() => setDeleteConfirm(null)} style={{ flex:1, padding:'0.75rem', borderRadius:99, background:'var(--cream2)', color:'var(--brown3)', fontSize:'0.82rem', fontWeight:500 }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TOAST */}
+      {toast && (
+        <div style={{ position:'fixed', bottom:'2rem', left:'50%', transform:'translateX(-50%)', background: toast.type==='error' ? 'var(--red)' : 'var(--brown)', color:'var(--cream)', padding:'0.7rem 1.4rem', borderRadius:99, fontSize:'0.8rem', fontWeight:500, boxShadow:'var(--shadow-md)', zIndex:2000, whiteSpace:'nowrap' }}>
+          {toast.msg}
+        </div>
+      )}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
