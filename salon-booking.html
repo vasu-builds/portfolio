@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Noir Studio — Luxury Salon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0c0c0c;
+      --bg2:     #141414;
+      --bg3:     #1c1c1c;
+      --bg4:     #242424;
+      --gold:    #c9a96e;
+      --gold2:   #e8cc9a;
+      --gold-d:  #8a6f3f;
+      --white:   #f0ece4;
+      --muted:   #6b6560;
+      --border:  rgba(201,169,110,0.12);
+      --border2: rgba(240,236,228,0.06);
+      --green:   #4a8c5c;
+      --green-bg:#0f2016;
+      --red:     #8c4a4a;
+      --red-bg:  #1f0f0f;
+      --font-d:  'Cormorant Garamond', serif;
+      --font-b:  'DM Sans', sans-serif;
+      --ease:    cubic-bezier(0.22,1,0.36,1);
+      --r:       12px;
+      --r-lg:    20px;
+    }
+    html,body,#root { height:100%; }
+    body { font-family:var(--font-b); background:var(--bg); color:var(--white); line-height:1.6; overflow-x:hidden; }
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:var(--bg2); }
+    ::-webkit-scrollbar-thumb { background:var(--gold-d); border-radius:99px; }
+    button { font-family:var(--font-b); cursor:pointer; border:none; outline:none; }
+    input,select,textarea { font-family:var(--font-b); outline:none; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ── DATA ── */
+const SERVICES = [
+  { id:1, cat:'Hair',    name:'Haircut & Style',   duration:45,  price:699,  icon:'✂', desc:'Precision cut tailored to your face shape and style preference.' },
+  { id:2, cat:'Hair',    name:'Hair Color',         duration:120, price:2499, icon:'◈', desc:'Full color, highlights, balayage or ombre by expert colorists.' },
+  { id:3, cat:'Hair',    name:'Hair Spa',            duration:60,  price:1299, icon:'◉', desc:'Deep conditioning treatment for smooth, lustrous hair.' },
+  { id:4, cat:'Beard',   name:'Beard Trim & Shape', duration:30,  price:399,  icon:'◎', desc:'Expert beard sculpting and hot towel finish.' },
+  { id:5, cat:'Beard',   name:'Luxury Shave',       duration:45,  price:599,  icon:'◆', desc:'Classic straight razor shave with warm oils and cold compress.' },
+  { id:6, cat:'Skin',    name:'Classic Facial',     duration:60,  price:1499, icon:'◇', desc:'Deep cleanse, exfoliation and hydrating mask for glowing skin.' },
+  { id:7, cat:'Skin',    name:'Gold Facial',        duration:75,  price:2999, icon:'✦', desc:'24K gold-infused luxury facial for anti-aging and radiance.' },
+  { id:8, cat:'Spa',     name:'Head Massage',       duration:30,  price:499,  icon:'▲', desc:'Relaxing scalp and neck massage with warm oils.' },
+  { id:9, cat:'Spa',     name:'Full Body Massage',  duration:90,  price:2499, icon:'◐', desc:'Swedish or deep tissue massage for full relaxation.' },
+  { id:10,cat:'Waxing',  name:'Full Body Wax',      duration:60,  price:1799, icon:'◑', desc:'Smooth, long-lasting wax with soothing after-care.' },
+  { id:11,cat:'Waxing',  name:'Face Wax',           duration:20,  price:399,  icon:'○', desc:'Precise facial hair removal with minimal discomfort.' },
+  { id:12,cat:'Makeup',  name:'Party Makeup',       duration:90,  price:3499, icon:'❋', desc:'Glamorous makeup for weddings, parties and special events.' },
+];
+
+const SLOTS = ['10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','12:30 PM','02:00 PM','02:30 PM','03:00 PM','03:30 PM','04:00 PM','04:30 PM','05:00 PM','05:30 PM','06:00 PM','06:30 PM'];
+const CATS  = ['All',...[...new Set(SERVICES.map(s=>s.cat))]];
+
+const SEED_BOOKINGS = [
+  { id:1, name:'Ananya Sharma',  phone:'9876543210', service:'Gold Facial',        date:'2024-11-20', slot:'02:00 PM', status:'Confirmed', price:2999 },
+  { id:2, name:'Rahul Mehta',    phone:'9812345678', service:'Luxury Shave',       date:'2024-11-20', slot:'11:00 AM', status:'Confirmed', price:599  },
+  { id:3, name:'Priya Nair',     phone:'9900112233', service:'Hair Color',         date:'2024-11-21', slot:'10:00 AM', status:'Pending',   price:2499 },
+  { id:4, name:'Karan Singh',    phone:'9988776655', service:'Full Body Massage',  date:'2024-11-21', slot:'03:00 PM', status:'Confirmed', price:2499 },
+  { id:5, name:'Meera Joshi',    phone:'9123456789', service:'Party Makeup',       date:'2024-11-22', slot:'10:00 AM', status:'Pending',   price:3499 },
+  { id:6, name:'Dev Kapoor',     phone:'9654321098', service:'Haircut & Style',    date:'2024-11-19', slot:'04:00 PM', status:'Completed', price:699  },
+];
+
+const fmt = n => '₹' + Number(n).toLocaleString('en-IN');
+const getDays = () => {
+  const days = [];
+  for(let i=0;i<14;i++){
+    const d = new Date(); d.setDate(d.getDate()+i);
+    days.push({ date: d.toISOString().split('T')[0], label: d.toLocaleDateString('en-IN',{weekday:'short'}), num: d.getDate(), month: d.toLocaleDateString('en-IN',{month:'short'}) });
+  }
+  return days;
+};
+
+/* ── STATUS BADGE ── */
+const Badge = ({status}) => {
+  const map = { Confirmed:{bg:'rgba(74,140,92,0.18)',c:'#6abf85'}, Pending:{bg:'rgba(201,169,110,0.15)',c:'var(--gold)'}, Completed:{bg:'rgba(240,236,228,0.08)',c:'var(--muted)'}, Cancelled:{bg:'rgba(140,74,74,0.18)',c:'#bf6a6a'} };
+  const s = map[status]||map.Pending;
+  return <span style={{background:s.bg,color:s.c,fontSize:'0.68rem',fontWeight:600,padding:'3px 10px',borderRadius:99,letterSpacing:'0.05em'}}>{status}</span>;
+};
+
+/* ── TOAST ── */
+const Toast = ({msg,type}) => (
+  <div style={{position:'fixed',bottom:'2rem',left:'50%',transform:'translateX(-50%)',background:type==='error'?'#3d1515':'#152b1e',border:`1px solid ${type==='error'?'#8c4a4a':'#4a8c5c'}`,color:type==='error'?'#e88080':'#80e8a0',padding:'0.75rem 1.6rem',borderRadius:99,fontSize:'0.8rem',fontWeight:500,zIndex:3000,whiteSpace:'nowrap',boxShadow:'0 8px 32px rgba(0,0,0,0.4)'}}>
+    {type==='error'?'✕ ':'✓ '}{msg}
+  </div>
+);
+
+/* ── MAIN APP ── */
+const App = () => {
+  const [screen, setScreen]   = useState('home');   // home | book | confirm | admin
+  const [adminPin, setAdminPin] = useState('');
+  const [adminAuth, setAdminAuth] = useState(false);
+  const [bookings, setBookings] = useState(SEED_BOOKINGS);
+  const [toast, setToast]     = useState(null);
+
+  // booking state
+  const [selCat, setSelCat]   = useState('All');
+  const [selSvc, setSelSvc]   = useState(null);
+  const [selDate, setSelDate] = useState('');
+  const [selSlot, setSelSlot] = useState('');
+  const [form, setForm]       = useState({name:'',phone:'',email:''});
+  const [step, setStep]       = useState(1); // 1=service 2=datetime 3=details
+
+  const days = getDays();
+
+  const showToast = (msg,type='success') => { setToast({msg,type}); setTimeout(()=>setToast(null),3000); };
+
+  const confirmBooking = () => {
+    if(!form.name||!form.phone){ showToast('Please fill in your details','error'); return; }
+    const nb = { id:Date.now(), name:form.name, phone:form.phone, email:form.email, service:selSvc.name, date:selDate, slot:selSlot, status:'Pending', price:selSvc.price };
+    setBookings(b=>[nb,...b]);
+    setScreen('confirm');
+    showToast('Booking confirmed!');
+  };
+
+  const cancelBooking = (id) => { setBookings(b=>b.map(bk=>bk.id===id?{...bk,status:'Cancelled'}:bk)); showToast('Booking cancelled','error'); };
+  const confirmBk    = (id) => { setBookings(b=>b.map(bk=>bk.id===id?{...bk,status:'Confirmed'}:bk)); showToast('Booking confirmed'); };
+  const completeBk   = (id) => { setBookings(b=>b.map(bk=>bk.id===id?{...bk,status:'Completed'}:bk)); showToast('Marked as completed'); };
+
+  const resetBook = () => { setSelSvc(null); setSelDate(''); setSelSlot(''); setForm({name:'',phone:'',email:''}); setStep(1); setScreen('home'); };
+
+  const filtered = selCat==='All' ? SERVICES : SERVICES.filter(s=>s.cat===selCat);
+  const takenSlots = bookings.filter(b=>b.date===selDate&&b.status!=='Cancelled').map(b=>b.slot);
+
+  /* shared styles */
+  const card = {background:'var(--bg2)',border:'1px solid var(--border2)',borderRadius:'var(--r)',padding:'1.4rem'};
+  const goldBtn = {background:'linear-gradient(135deg,var(--gold-d),var(--gold))',color:'#1a1208',padding:'0.85rem 2rem',borderRadius:99,fontSize:'0.85rem',fontWeight:700,letterSpacing:'0.03em',cursor:'pointer',border:'none'};
+  const outlineBtn = {background:'transparent',color:'var(--muted)',border:'1px solid var(--border2)',padding:'0.85rem 1.6rem',borderRadius:99,fontSize:'0.82rem',fontWeight:500,cursor:'pointer'};
+  const input = {width:'100%',padding:'0.75rem 1rem',borderRadius:10,border:'1px solid var(--border2)',background:'var(--bg3)',color:'var(--white)',fontSize:'0.875rem',fontFamily:'var(--font-b)'};
+  const label = {display:'block',fontSize:'0.68rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.4rem'};
+
+  /* ── HOME ── */
+  if(screen==='home') return (
+    <div style={{minHeight:'100vh',background:'var(--bg)'}}>
+      {/* NAV */}
+      <nav style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'1.2rem 5%',borderBottom:'1px solid var(--border2)',position:'sticky',top:0,background:'rgba(12,12,12,0.92)',backdropFilter:'blur(16px)',zIndex:100}}>
+        <div style={{fontFamily:'var(--font-d)',fontSize:'1.5rem',fontWeight:300,letterSpacing:'0.12em',color:'var(--gold)'}}>NOIR <span style={{color:'var(--white)',fontStyle:'italic'}}>Studio</span></div>
+        <div style={{display:'flex',gap:'0.75rem'}}>
+          <button onClick={()=>{setAdminAuth(false);setScreen('admin')}} style={{...outlineBtn,padding:'0.55rem 1.1rem',fontSize:'0.75rem'}}>Admin</button>
+          <button onClick={()=>{setStep(1);setScreen('book')}} style={{...goldBtn,padding:'0.6rem 1.4rem',fontSize:'0.8rem'}}>Book Now</button>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <div style={{position:'relative',overflow:'hidden',padding:'6rem 5% 5rem',textAlign:'center',minHeight:'90vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+        {/* bg texture */}
+        <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,169,110,0.06) 0%,transparent 70%)',pointerEvents:'none'}}></div>
+        <svg style={{position:'absolute',top:'10%',right:'5%',opacity:0.04}} width="340" height="340" viewBox="0 0 340 340"><circle cx="170" cy="170" r="160" stroke="#c9a96e" strokeWidth="1" fill="none"/><circle cx="170" cy="170" r="110" stroke="#c9a96e" strokeWidth="1" fill="none"/><circle cx="170" cy="170" r="60" stroke="#c9a96e" strokeWidth="1" fill="none"/></svg>
+        <svg style={{position:'absolute',bottom:'5%',left:'3%',opacity:0.03}} width="240" height="240" viewBox="0 0 240 240"><circle cx="120" cy="120" r="110" stroke="#c9a96e" strokeWidth="1" fill="none"/></svg>
+
+        <div style={{position:'relative',zIndex:1}}>
+          <div style={{fontSize:'0.72rem',fontWeight:600,letterSpacing:'0.2em',textTransform:'uppercase',color:'var(--gold)',marginBottom:'1.5rem',opacity:0.8}}>— Luxury Salon & Spa —</div>
+          <h1 style={{fontFamily:'var(--font-d)',fontSize:'clamp(3rem,8vw,6.5rem)',fontWeight:300,lineHeight:1.05,letterSpacing:'-0.01em',color:'var(--white)',marginBottom:'1.5rem'}}>
+            Where Style<br/><em style={{color:'var(--gold)',fontWeight:300}}>Meets Craft</em>
+          </h1>
+          <p style={{fontSize:'1rem',fontWeight:300,color:'var(--muted)',maxWidth:440,margin:'0 auto 3rem',lineHeight:1.8}}>
+            Premium grooming and wellness services tailored for the discerning individual.
+          </p>
+          <button onClick={()=>{setStep(1);setScreen('book')}} style={{...goldBtn,padding:'1rem 2.8rem',fontSize:'0.9rem',boxShadow:'0 8px 32px rgba(201,169,110,0.25)'}}>
+            Reserve Your Session →
+          </button>
+        </div>
+      </div>
+
+      {/* SERVICES PREVIEW */}
+      <div style={{padding:'4rem 5%',borderTop:'1px solid var(--border2)'}}>
+        <div style={{textAlign:'center',marginBottom:'3rem'}}>
+          <div style={{fontSize:'0.68rem',letterSpacing:'0.18em',textTransform:'uppercase',color:'var(--gold)',marginBottom:'0.8rem'}}>Our Services</div>
+          <h2 style={{fontFamily:'var(--font-d)',fontSize:'clamp(1.8rem,4vw,3rem)',fontWeight:300,color:'var(--white)'}}>Curated for <em style={{color:'var(--gold)'}}>Excellence</em></h2>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))',gap:'1px',background:'var(--border2)',borderRadius:'var(--r-lg)',overflow:'hidden',border:'1px solid var(--border2)'}}>
+          {SERVICES.slice(0,6).map(s=>(
+            <div key={s.id} onClick={()=>{setSelSvc(s);setStep(2);setScreen('book')}}
+              style={{background:'var(--bg2)',padding:'1.8rem',cursor:'pointer',transition:'background 0.2s'}
+              } onMouseEnter={e=>e.currentTarget.style.background='var(--bg3)'} onMouseLeave={e=>e.currentTarget.style.background='var(--bg2)'}>
+              <div style={{fontSize:'1.2rem',marginBottom:'0.9rem',color:'var(--gold)'}}>{s.icon}</div>
+              <div style={{fontSize:'0.65rem',fontWeight:600,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.4rem'}}>{s.cat}</div>
+              <h3 style={{fontFamily:'var(--font-d)',fontSize:'1.1rem',fontWeight:400,color:'var(--white)',marginBottom:'0.4rem'}}>{s.name}</h3>
+              <p style={{fontSize:'0.78rem',fontWeight:300,color:'var(--muted)',lineHeight:1.6,marginBottom:'0.9rem'}}>{s.desc}</p>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <span style={{fontFamily:'var(--font-d)',fontSize:'1.1rem',color:'var(--gold)',fontWeight:400}}>{fmt(s.price)}</span>
+                <span style={{fontSize:'0.72rem',color:'var(--muted)'}}>{s.duration} min</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{textAlign:'center',marginTop:'2rem'}}>
+          <button onClick={()=>{setStep(1);setScreen('book')}} style={outlineBtn}>View all {SERVICES.length} services →</button>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div style={{borderTop:'1px solid var(--border2)',padding:'2rem 5%',display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:'1rem'}}>
+        <div style={{fontFamily:'var(--font-d)',fontSize:'1.1rem',color:'var(--gold)',fontStyle:'italic'}}>Noir Studio</div>
+        <div style={{fontSize:'0.78rem',color:'var(--muted)',fontWeight:300}}>Mon – Sun &nbsp;·&nbsp; 10:00 AM – 7:00 PM &nbsp;·&nbsp; +91 98765 43210</div>
+      </div>
+    </div>
+  );
+
+  /* ── BOOKING FLOW ── */
+  if(screen==='book') return (
+    <div style={{minHeight:'100vh',background:'var(--bg)'}}>
+      <nav style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'1.1rem 5%',borderBottom:'1px solid var(--border2)',background:'rgba(12,12,12,0.95)',backdropFilter:'blur(16px)',position:'sticky',top:0,zIndex:100}}>
+        <div style={{fontFamily:'var(--font-d)',fontSize:'1.4rem',fontWeight:300,color:'var(--gold)'}}>NOIR <em style={{color:'var(--white)'}}>Studio</em></div>
+        <button onClick={resetBook} style={{...outlineBtn,padding:'0.5rem 1rem',fontSize:'0.75rem'}}>← Back</button>
+      </nav>
+
+      {/* steps indicator */}
+      <div style={{padding:'2rem 5% 0'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'0.5rem',marginBottom:'2rem',maxWidth:600}}>
+          {[{n:1,l:'Service'},{n:2,l:'Date & Time'},{n:3,l:'Your Details'}].map((s,i)=>(
+            <React.Fragment key={s.n}>
+              <div style={{display:'flex',alignItems:'center',gap:'0.5rem',opacity:step>=s.n?1:0.3}}>
+                <div style={{width:26,height:26,borderRadius:'50%',background:step===s.n?'var(--gold)':step>s.n?'var(--green)':'var(--bg3)',border:`1px solid ${step>=s.n?'var(--gold)':'var(--border2)'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.7rem',fontWeight:700,color:step>=s.n?'#1a1208':'var(--muted)'}}>
+                  {step>s.n?'✓':s.n}
+                </div>
+                <span style={{fontSize:'0.78rem',fontWeight:500,color:step===s.n?'var(--white)':'var(--muted)'}}>{s.l}</span>
+              </div>
+              {i<2 && <div style={{flex:1,height:1,background:step>s.n?'var(--gold-d)':'var(--border2)',maxWidth:80}}></div>}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+      <div style={{padding:'0 5% 4rem',maxWidth:900,margin:'0 auto'}}>
+
+        {/* STEP 1 — service */}
+        {step===1 && (
+          <div>
+            <h2 style={{fontFamily:'var(--font-d)',fontSize:'2rem',fontWeight:300,color:'var(--white)',marginBottom:'0.4rem'}}>Choose a <em style={{color:'var(--gold)'}}>Service</em></h2>
+            <p style={{fontSize:'0.82rem',color:'var(--muted)',fontWeight:300,marginBottom:'2rem'}}>Select the service you'd like to book.</p>
+            <div style={{display:'flex',gap:'0.5rem',flexWrap:'wrap',marginBottom:'1.8rem'}}>
+              {CATS.map(c=>(
+                <button key={c} onClick={()=>setSelCat(c)}
+                  style={{padding:'0.4rem 1rem',borderRadius:99,border:`1px solid ${selCat===c?'var(--gold)':'var(--border2)'}`,background:selCat===c?'rgba(201,169,110,0.12)':'transparent',color:selCat===c?'var(--gold)':'var(--muted)',fontSize:'0.78rem',fontWeight:500}}>
+                  {c}
+                </button>
+              ))}
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:'1rem'}}>
+              {filtered.map(s=>(
+                <div key={s.id} onClick={()=>{setSelSvc(s);setStep(2)}}
+                  style={{...card,cursor:'pointer',border:`1px solid ${selSvc?.id===s.id?'var(--gold)':'var(--border2)'}`,background:selSvc?.id===s.id?'rgba(201,169,110,0.06)':'var(--bg2)',transition:'all 0.2s'}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--gold-d)';e.currentTarget.style.background='var(--bg3)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor=selSvc?.id===s.id?'var(--gold)':'var(--border2)';e.currentTarget.style.background=selSvc?.id===s.id?'rgba(201,169,110,0.06)':'var(--bg2)'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'0.9rem'}}>
+                    <span style={{fontSize:'1.1rem',color:'var(--gold)'}}>{s.icon}</span>
+                    <span style={{fontSize:'0.68rem',color:'var(--muted)',background:'var(--bg3)',padding:'3px 8px',borderRadius:99}}>{s.duration} min</span>
+                  </div>
+                  <div style={{fontSize:'0.65rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.3rem'}}>{s.cat}</div>
+                  <h3 style={{fontFamily:'var(--font-d)',fontSize:'1.05rem',fontWeight:400,color:'var(--white)',marginBottom:'0.4rem'}}>{s.name}</h3>
+                  <p style={{fontSize:'0.77rem',color:'var(--muted)',fontWeight:300,lineHeight:1.6,marginBottom:'0.9rem'}}>{s.desc}</p>
+                  <div style={{fontFamily:'var(--font-d)',fontSize:'1.15rem',color:'var(--gold)',fontWeight:400}}>{fmt(s.price)}</div>
+                </div>
+              ))}
+            </div>
+            {selSvc && (
+              <div style={{marginTop:'2rem',display:'flex',justifyContent:'flex-end'}}>
+                <button onClick={()=>setStep(2)} style={goldBtn}>Continue with {selSvc.name} →</button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* STEP 2 — date & time */}
+        {step===2 && (
+          <div>
+            <h2 style={{fontFamily:'var(--font-d)',fontSize:'2rem',fontWeight:300,color:'var(--white)',marginBottom:'0.4rem'}}>Pick a <em style={{color:'var(--gold)'}}>Date & Time</em></h2>
+            <p style={{fontSize:'0.82rem',color:'var(--muted)',fontWeight:300,marginBottom:'2rem'}}>For: <span style={{color:'var(--white)'}}>{selSvc?.name}</span></p>
+
+            {/* date picker */}
+            <div style={{fontSize:'0.7rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'1rem'}}>Select Date</div>
+            <div style={{display:'flex',gap:'0.5rem',overflowX:'auto',paddingBottom:'0.5rem',marginBottom:'2rem'}}>
+              {days.map(d=>(
+                <button key={d.date} onClick={()=>{setSelDate(d.date);setSelSlot('');}}
+                  style={{flexShrink:0,width:62,padding:'0.7rem 0',borderRadius:10,border:`1px solid ${selDate===d.date?'var(--gold)':'var(--border2)'}`,background:selDate===d.date?'rgba(201,169,110,0.12)':'var(--bg2)',color:selDate===d.date?'var(--gold)':'var(--muted)',textAlign:'center',cursor:'pointer'}}>
+                  <div style={{fontSize:'0.62rem',letterSpacing:'0.06em',marginBottom:'0.2rem'}}>{d.label}</div>
+                  <div style={{fontFamily:'var(--font-d)',fontSize:'1.3rem',fontWeight:400,lineHeight:1}}>{d.num}</div>
+                  <div style={{fontSize:'0.6rem',marginTop:'0.2rem',opacity:0.6}}>{d.month}</div>
+                </button>
+              ))}
+            </div>
+
+            {/* time slots */}
+            {selDate && (
+              <>
+                <div style={{fontSize:'0.7rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'1rem'}}>Select Time Slot</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(110px,1fr))',gap:'0.5rem',marginBottom:'2rem'}}>
+                  {SLOTS.map(sl=>{
+                    const taken = takenSlots.includes(sl);
+                    return (
+                      <button key={sl} disabled={taken} onClick={()=>setSelSlot(sl)}
+                        style={{padding:'0.65rem',borderRadius:8,border:`1px solid ${selSlot===sl?'var(--gold)':taken?'var(--border2)':'var(--border2)'}`,background:selSlot===sl?'rgba(201,169,110,0.12)':taken?'var(--bg3)':'var(--bg2)',color:selSlot===sl?'var(--gold)':taken?'var(--muted)':'var(--white)',fontSize:'0.8rem',fontWeight:500,opacity:taken?0.35:1,cursor:taken?'not-allowed':'pointer',position:'relative'}}>
+                        {sl}
+                        {taken && <div style={{position:'absolute',top:3,right:4,width:5,height:5,borderRadius:'50%',background:'var(--red)'}}></div>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            <div style={{display:'flex',gap:'0.75rem',justifyContent:'space-between'}}>
+              <button onClick={()=>setStep(1)} style={outlineBtn}>← Back</button>
+              {selDate && selSlot && <button onClick={()=>setStep(3)} style={goldBtn}>Continue →</button>}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3 — details */}
+        {step===3 && (
+          <div style={{maxWidth:500}}>
+            <h2 style={{fontFamily:'var(--font-d)',fontSize:'2rem',fontWeight:300,color:'var(--white)',marginBottom:'0.4rem'}}>Your <em style={{color:'var(--gold)'}}>Details</em></h2>
+            <p style={{fontSize:'0.82rem',color:'var(--muted)',fontWeight:300,marginBottom:'2rem'}}>Almost done — just a few details.</p>
+
+            {/* summary */}
+            <div style={{...card,background:'rgba(201,169,110,0.06)',border:'1px solid var(--border)',marginBottom:'2rem'}}>
+              <div style={{fontSize:'0.68rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--gold)',marginBottom:'0.9rem'}}>Booking Summary</div>
+              {[['Service',selSvc?.name],['Duration',`${selSvc?.duration} min`],['Date',new Date(selDate).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})],['Time',selSlot],['Price',fmt(selSvc?.price)]].map(([k,v])=>(
+                <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'0.4rem 0',borderBottom:'1px solid var(--border2)',fontSize:'0.82rem'}}>
+                  <span style={{color:'var(--muted)',fontWeight:300}}>{k}</span>
+                  <span style={{color:k==='Price'?'var(--gold)':'var(--white)',fontWeight:k==='Price'?600:400,fontFamily:k==='Price'?'var(--font-d)':'inherit',fontSize:k==='Price'?'1rem':'inherit'}}>{v}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{display:'flex',flexDirection:'column',gap:'1.1rem',marginBottom:'2rem'}}>
+              {[['name','Full Name','text','Your full name'],['phone','Phone Number','tel','10-digit mobile number'],['email','Email (optional)','email','For confirmation']].map(([k,l,t,ph])=>(
+                <div key={k}>
+                  <label style={label}>{l}</label>
+                  <input type={t} value={form[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} placeholder={ph} style={input} />
+                </div>
+              ))}
+            </div>
+
+            <div style={{display:'flex',gap:'0.75rem'}}>
+              <button onClick={()=>setStep(2)} style={outlineBtn}>← Back</button>
+              <button onClick={confirmBooking} style={{...goldBtn,flex:1,textAlign:'center'}}>Confirm Booking →</button>
+            </div>
+          </div>
+        )}
+      </div>
+      {toast && <Toast msg={toast.msg} type={toast.type}/>}
+    </div>
+  );
+
+  /* ── CONFIRMATION ── */
+  if(screen==='confirm') {
+    const bk = bookings[0];
+    return (
+      <div style={{minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center',padding:'2rem'}}>
+        <div style={{...card,maxWidth:460,width:'100%',textAlign:'center',background:'var(--bg2)',border:'1px solid var(--border)'}}>
+          <div style={{width:60,height:60,borderRadius:'50%',background:'rgba(74,140,92,0.15)',border:'1px solid rgba(74,140,92,0.3)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.4rem',margin:'0 auto 1.5rem'}}>✓</div>
+          <h2 style={{fontFamily:'var(--font-d)',fontSize:'1.8rem',fontWeight:300,color:'var(--white)',marginBottom:'0.4rem'}}>Booking <em style={{color:'var(--gold)'}}>Confirmed</em></h2>
+          <p style={{fontSize:'0.82rem',color:'var(--muted)',fontWeight:300,marginBottom:'2rem'}}>We'll see you soon, {bk?.name}.</p>
+          <div style={{background:'var(--bg3)',borderRadius:10,padding:'1.2rem',marginBottom:'2rem',textAlign:'left'}}>
+            {[['Service',selSvc?.name],['Date',new Date(selDate).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})],['Time',selSlot],['Amount',fmt(selSvc?.price)]].map(([k,v])=>(
+              <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'0.4rem 0',borderBottom:'1px solid var(--border2)',fontSize:'0.82rem'}}>
+                <span style={{color:'var(--muted)'}}>{k}</span>
+                <span style={{color:k==='Amount'?'var(--gold)':'var(--white)',fontFamily:k==='Amount'?'var(--font-d)':'inherit'}}>{v}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{fontSize:'0.75rem',color:'var(--muted)',marginBottom:'2rem',lineHeight:1.7}}>
+            📞 For changes, call us at <span style={{color:'var(--white)'}}>+91 98765 43210</span><br/>
+            ✉ A confirmation has been noted for your records.
+          </div>
+          <button onClick={resetBook} style={{...goldBtn,width:'100%'}}>Book Another Session</button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── ADMIN ── */
+  if(screen==='admin') {
+    if(!adminAuth) return (
+      <div style={{minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center',padding:'2rem'}}>
+        <div style={{...card,maxWidth:360,width:'100%',background:'var(--bg2)',border:'1px solid var(--border)'}}>
+          <div style={{fontFamily:'var(--font-d)',fontSize:'1.5rem',fontWeight:300,color:'var(--gold)',marginBottom:'0.3rem'}}>Admin <em style={{color:'var(--white)'}}>Panel</em></div>
+          <p style={{fontSize:'0.78rem',color:'var(--muted)',marginBottom:'1.8rem',fontWeight:300}}>Enter your PIN to continue</p>
+          <label style={label}>PIN</label>
+          <input type="password" value={adminPin} onChange={e=>setAdminPin(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&adminPin==='1234'){setAdminAuth(true);}else if(e.key==='Enter'){showToast('Wrong PIN','error');}}} placeholder="••••" style={{...input,marginBottom:'1rem',letterSpacing:'0.3em',fontSize:'1.2rem'}}/>
+          <button onClick={()=>{if(adminPin==='1234')setAdminAuth(true);else showToast('Wrong PIN','error');}} style={{...goldBtn,width:'100%'}}>Enter →</button>
+          <p style={{fontSize:'0.7rem',color:'var(--muted)',textAlign:'center',marginTop:'1rem'}}>Demo PIN: 1234</p>
+          <button onClick={()=>setScreen('home')} style={{...outlineBtn,width:'100%',marginTop:'0.5rem',fontSize:'0.75rem'}}>← Back to site</button>
+        </div>
+        {toast && <Toast msg={toast.msg} type={toast.type}/>}
+      </div>
+    );
+
+    const stats = {total:bookings.length, confirmed:bookings.filter(b=>b.status==='Confirmed').length, pending:bookings.filter(b=>b.status==='Pending').length, revenue:bookings.filter(b=>b.status==='Completed'||b.status==='Confirmed').reduce((a,b)=>a+b.price,0)};
+    const [adminFilter,setAdminFilter] = useState('All');
+    const adminFiltered = adminFilter==='All'?bookings:bookings.filter(b=>b.status===adminFilter);
+
+    return (
+      <div style={{minHeight:'100vh',background:'var(--bg)',display:'flex'}}>
+        {/* sidebar */}
+        <aside style={{width:220,background:'var(--bg2)',borderRight:'1px solid var(--border2)',padding:'1.4rem 1rem',flexShrink:0,display:'flex',flexDirection:'column'}}>
+          <div style={{fontFamily:'var(--font-d)',fontSize:'1.2rem',fontWeight:300,color:'var(--gold)',marginBottom:'2rem',paddingLeft:'0.5rem'}}>Noir <em style={{color:'var(--white)'}}>Admin</em></div>
+          {[['◈','Bookings'],['◉','Analytics']].map(([ic,l])=>(
+            <button key={l} style={{width:'100%',display:'flex',alignItems:'center',gap:'0.7rem',padding:'0.65rem 0.9rem',borderRadius:8,marginBottom:'0.2rem',background:l==='Bookings'?'rgba(201,169,110,0.1)':'transparent',color:l==='Bookings'?'var(--gold)':'var(--muted)',fontSize:'0.82rem',fontWeight:500,textAlign:'left'}}>{ic} {l}</button>
+          ))}
+          <div style={{marginTop:'auto'}}>
+            <button onClick={()=>{setScreen('home');setAdminAuth(false);setAdminPin('');}} style={{...outlineBtn,width:'100%',fontSize:'0.75rem',padding:'0.6rem'}}>← Exit Admin</button>
+          </div>
+        </aside>
+
+        {/* content */}
+        <main style={{flex:1,overflowY:'auto',padding:'2rem'}}>
+          <div style={{marginBottom:'2rem'}}>
+            <h1 style={{fontFamily:'var(--font-d)',fontSize:'1.8rem',fontWeight:300,color:'var(--white)'}}>Bookings <em style={{color:'var(--gold)'}}>Overview</em></h1>
+            <p style={{fontSize:'0.8rem',color:'var(--muted)',fontWeight:300,marginTop:4}}>Manage all appointments from here.</p>
+          </div>
+
+          {/* stat cards */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:'1rem',marginBottom:'2rem'}}>
+            {[{l:'Total',v:stats.total,c:'var(--muted)'},{l:'Confirmed',v:stats.confirmed,c:'#6abf85'},{l:'Pending',v:stats.pending,c:'var(--gold)'},{l:'Revenue',v:fmt(stats.revenue),c:'var(--gold)'}].map(s=>(
+              <div key={s.l} style={{...card,borderTop:`2px solid ${s.c}`}}>
+                <div style={{fontSize:'0.65rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.6rem'}}>{s.l}</div>
+                <div style={{fontFamily:'var(--font-d)',fontSize:'1.7rem',fontWeight:300,fontStyle:'italic',color:s.c,lineHeight:1}}>{s.v}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* filter */}
+          <div style={{display:'flex',gap:'0.5rem',marginBottom:'1.2rem',flexWrap:'wrap'}}>
+            {['All','Pending','Confirmed','Completed','Cancelled'].map(f=>(
+              <button key={f} onClick={()=>setAdminFilter(f)}
+                style={{padding:'0.4rem 1rem',borderRadius:99,border:`1px solid ${adminFilter===f?'var(--gold)':'var(--border2)'}`,background:adminFilter===f?'rgba(201,169,110,0.1)':'transparent',color:adminFilter===f?'var(--gold)':'var(--muted)',fontSize:'0.75rem',fontWeight:500}}>
+                {f}
+              </button>
+            ))}
+          </div>
+
+          {/* bookings list */}
+          <div style={{display:'flex',flexDirection:'column',gap:'0.75rem'}}>
+            {adminFiltered.map(b=>(
+              <div key={b.id} style={{...card,display:'flex',alignItems:'center',gap:'1rem',flexWrap:'wrap'}}>
+                <div style={{flex:'1 1 200px'}}>
+                  <div style={{fontSize:'0.88rem',fontWeight:600,color:'var(--white)',marginBottom:2}}>{b.name}</div>
+                  <div style={{fontSize:'0.75rem',color:'var(--muted)',fontWeight:300}}>{b.phone}</div>
+                </div>
+                <div style={{flex:'1 1 160px'}}>
+                  <div style={{fontFamily:'var(--font-d)',fontSize:'0.95rem',color:'var(--gold)'}}>{b.service}</div>
+                  <div style={{fontSize:'0.75rem',color:'var(--muted)',fontWeight:300}}>{new Date(b.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'})} · {b.slot}</div>
+                </div>
+                <div style={{flex:'0 0 auto'}}><Badge status={b.status}/></div>
+                <div style={{fontFamily:'var(--font-d)',fontSize:'1rem',color:'var(--gold)',flex:'0 0 80px',textAlign:'right'}}>{fmt(b.price)}</div>
+                <div style={{display:'flex',gap:'0.4rem',flex:'0 0 auto'}}>
+                  {b.status==='Pending'   && <button onClick={()=>confirmBk(b.id)}  style={{padding:'0.35rem 0.8rem',borderRadius:6,background:'rgba(74,140,92,0.15)',color:'#6abf85',fontSize:'0.72rem',fontWeight:600,border:'1px solid rgba(74,140,92,0.2)'}}>Confirm</button>}
+                  {b.status==='Confirmed' && <button onClick={()=>completeBk(b.id)} style={{padding:'0.35rem 0.8rem',borderRadius:6,background:'var(--bg3)',color:'var(--muted)',fontSize:'0.72rem',fontWeight:600,border:'1px solid var(--border2)'}}>Done</button>}
+                  {(b.status==='Pending'||b.status==='Confirmed') && <button onClick={()=>cancelBooking(b.id)} style={{padding:'0.35rem 0.8rem',borderRadius:6,background:'rgba(140,74,74,0.12)',color:'#bf6a6a',fontSize:'0.72rem',fontWeight:600,border:'1px solid rgba(140,74,74,0.2)'}}>Cancel</button>}
+                </div>
+              </div>
+            ))}
+            {adminFiltered.length===0 && <div style={{textAlign:'center',padding:'3rem',color:'var(--muted)',fontSize:'0.9rem',fontWeight:300}}>No bookings found.</div>}
+          </div>
+        </main>
+        {toast && <Toast msg={toast.msg} type={toast.type}/>}
+      </div>
+    );
+  }
+
+  return null;
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
