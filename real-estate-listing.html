@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haven — Find Your Perfect Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --white:#fff; --off:#f7f6f3; --stone:#e8e4dc; --stone2:#d4cfc5;
+  --sage:#4a6741; --sage-lt:#e8efe7; --sage-md:#7a9e76; --sage-dk:#3a5432;
+  --ink:#1a1c18; --ink-60:rgba(26,28,24,.6); --ink-30:rgba(26,28,24,.3); --ink-10:rgba(26,28,24,.07);
+  --sun:#e8a830;
+  --r-sm:8px; --r-md:14px; --r-lg:20px; --r-xl:32px; --r-pill:999px;
+  --ease:cubic-bezier(.22,1,.36,1); --t:.38s var(--ease);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Manrope',sans-serif;background:var(--white);color:var(--ink);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--stone2);border-radius:3px;}
+
+/* ── LAYOUT ── */
+.container{max-width:1280px;margin:0 auto;padding:0 2rem;}
+.container--wide{max-width:1420px;margin:0 auto;padding:0 2rem;}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s var(--ease),transform .65s var(--ease);}
+.reveal.in{opacity:1;transform:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ══ NAV ══════════════════════════════════════════════════════════ */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2.5rem;transition:background .4s,box-shadow .4s,padding .4s;}
+nav.stuck{background:rgba(255,255,255,.96);backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--stone);padding:.85rem 2.5rem;}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--ink);text-decoration:none;letter-spacing:-.03em;cursor:pointer;}
+.nav-logo span{color:var(--sage);}
+.nav-links{display:flex;gap:1.75rem;list-style:none;align-items:center;}
+.nav-links button{font-size:.875rem;font-weight:500;color:var(--ink-60);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.01em;transition:color .25s;}
+.nav-links button:hover{color:var(--ink);}
+.nav-right{display:flex;gap:.7rem;align-items:center;}
+.btn-nav-ghost{font-size:.875rem;font-weight:500;color:var(--ink);padding:.5rem 1.2rem;border:1.5px solid var(--stone);border-radius:var(--r-pill);background:none;cursor:pointer;transition:border-color .25s,background .25s;}
+.btn-nav-ghost:hover{border-color:var(--sage);background:var(--sage-lt);}
+.btn-nav-solid{font-size:.875rem;font-weight:600;color:var(--white);padding:.5rem 1.3rem;background:var(--sage);border-radius:var(--r-pill);border:none;cursor:pointer;transition:background .25s,transform .2s;}
+.btn-nav-solid:hover{background:var(--sage-dk);transform:translateY(-1px);}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
+.hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px;transition:var(--t);display:block;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+/* Mobile menu */
+.mob-menu{position:fixed;inset:0;background:var(--white);z-index:190;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.75rem;transform:translateX(100%);transition:transform .4s var(--ease);}
+.mob-menu.open{transform:none;}
+.mob-menu button{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:700;color:var(--ink);background:none;border:none;cursor:pointer;letter-spacing:-.03em;transition:color .2s;}
+.mob-menu button:hover{color:var(--sage);}
+.mob-cta{font-size:1.1rem!important;background:var(--sage)!important;color:var(--white)!important;padding:.8rem 2.5rem;border-radius:var(--r-pill);}
+
+/* ══ SHARED TYPOGRAPHY ══════════════════════════════════════════════ */
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);margin-bottom:.6rem;display:block;}
+.section-h{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.02;}
+.section-h em{font-family:'Instrument Serif',serif;font-weight:400;font-style:italic;color:var(--sage);}
+
+/* ══ BUTTONS ══════════════════════════════════════════════════════ */
+.btn-ink{display:inline-flex;align-items:center;gap:.5rem;background:var(--ink);color:var(--white);padding:.9rem 2rem;border-radius:var(--r-pill);font-size:.9rem;font-weight:600;border:none;cursor:pointer;transition:background .25s,transform .2s;}
+.btn-ink:hover{background:var(--sage);transform:translateY(-2px);}
+.btn-ink svg{transition:transform .25s;}
+.btn-ink:hover svg{transform:translateX(3px);}
+.btn-outline{display:inline-flex;align-items:center;gap:.5rem;color:var(--ink);padding:.9rem 2rem;border-radius:var(--r-pill);font-size:.9rem;font-weight:600;border:1.5px solid var(--stone);background:none;cursor:pointer;transition:border-color .25s,color .25s,transform .2s;}
+.btn-outline:hover{border-color:var(--sage);color:var(--sage);transform:translateY(-2px);}
+.btn-sage{display:inline-flex;align-items:center;gap:.5rem;background:var(--sage);color:var(--white);padding:.9rem 2rem;border-radius:var(--r-pill);font-size:.9rem;font-weight:600;border:none;cursor:pointer;transition:background .25s,transform .2s;}
+.btn-sage:hover{background:var(--sage-dk);transform:translateY(-2px);}
+
+/* ══ HERO ══════════════════════════════════════════════════════════ */
+#hero{min-height:100svh;background:var(--off);display:grid;grid-template-columns:1fr 1fr;overflow:hidden;position:relative;}
+.hero-l{display:flex;flex-direction:column;justify-content:center;padding:10rem 3rem 6rem 4rem;position:relative;z-index:2;}
+.hero-tag{display:inline-flex;align-items:center;gap:.5rem;background:var(--sage-lt);color:var(--sage);font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:.4rem 1rem;border-radius:var(--r-pill);margin-bottom:1.75rem;width:fit-content;animation:fadeUp .8s .1s var(--ease) both;}
+.hero-tag::before{content:'';width:6px;height:6px;background:var(--sage);border-radius:50%;}
+.hero-h{font-family:'Syne',sans-serif;font-size:clamp(3rem,5.5vw,5.2rem);font-weight:800;line-height:.97;letter-spacing:-.04em;margin-bottom:1.4rem;animation:fadeUp .8s .2s var(--ease) both;}
+.hero-h em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:var(--sage);}
+.hero-p{font-size:1rem;line-height:1.76;color:var(--ink-60);max-width:400px;margin-bottom:2.25rem;animation:fadeUp .8s .32s var(--ease) both;}
+.hero-acts{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;animation:fadeUp .8s .44s var(--ease) both;}
+.hero-stats{display:flex;gap:2.5rem;margin-top:4rem;padding-top:2rem;border-top:1px solid var(--stone);animation:fadeUp .8s .55s var(--ease) both;flex-wrap:wrap;}
+.hs-num{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;letter-spacing:-.04em;display:block;line-height:1;}
+.hs-lbl{font-size:.74rem;color:var(--ink-60);margin-top:.25rem;display:block;}
+.hero-r{position:relative;overflow:hidden;animation:fadeIn 1s .15s var(--ease) both;}
+.hero-bg-img{width:100%;height:100%;background:linear-gradient(160deg,#c8d9c6,#a8c4a4 45%,#d4e4d2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;}
+.hero-bg-img .icon{font-size:5.5rem;opacity:.38;}
+.hero-bg-img p{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(0,0,0,.25);}
+.float-card{position:absolute;bottom:2.5rem;left:-2.5rem;background:var(--white);border-radius:var(--r-lg);padding:1.25rem 1.5rem;box-shadow:0 20px 56px rgba(0,0,0,.12);min-width:210px;animation:fadeUp .9s .62s var(--ease) both;}
+.fc-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-60);margin-bottom:.4rem;}
+.fc-price{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;letter-spacing:-.03em;}
+.fc-addr{font-size:.74rem;color:var(--ink-60);margin-top:.15rem;}
+.fc-badge{display:inline-block;margin-top:.6rem;background:var(--sage-lt);color:var(--sage);font-size:.68rem;font-weight:700;padding:.22rem .65rem;border-radius:var(--r-pill);}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;z-index:2;animation:fadeUp 1s .8s var(--ease) both;}
+.sw{width:24px;height:38px;border:2px solid var(--ink-30);border-radius:var(--r-pill);display:flex;justify-content:center;padding-top:5px;}
+.sw::before{content:'';width:4px;height:7px;background:var(--sage);border-radius:var(--r-pill);animation:swAnim 2s ease-in-out infinite;}
+@keyframes swAnim{0%{transform:translateY(0);opacity:1}80%{transform:translateY(9px);opacity:0}100%{transform:translateY(0);opacity:0}}
+.scroll-hint span{font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-30);}
+
+/* ══ SEARCH BAR ══════════════════════════════════════════════════ */
+.sb-wrap{background:var(--white);position:sticky;top:68px;z-index:100;box-shadow:0 2px 0 var(--stone);}
+.sb-inner{display:flex;align-items:stretch;border:1.5px solid var(--stone);border-radius:var(--r-lg);overflow:hidden;margin:1.1rem auto;max-width:900px;background:var(--white);transition:box-shadow .3s;}
+.sb-inner:focus-within{box-shadow:0 0 0 3px rgba(74,103,65,.14);border-color:var(--sage);}
+.sf{flex:1;display:flex;align-items:center;gap:.55rem;padding:0 1.1rem;border-right:1.5px solid var(--stone);min-width:0;}
+.sf:last-of-type{border-right:none;}
+.sf svg{flex-shrink:0;color:var(--ink-30);}
+.sf input,.sf select{border:none;outline:none;background:none;font-family:'Manrope',sans-serif;font-size:.875rem;color:var(--ink);width:100%;padding:.95rem 0;cursor:pointer;}
+.sf input::placeholder{color:var(--ink-30);}
+.sb-btn{background:var(--sage);color:var(--white);border:none;padding:0 1.75rem;font-family:'Manrope',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.45rem;transition:background .25s;white-space:nowrap;}
+.sb-btn:hover{background:var(--sage-dk);}
+
+/* ══ SECTION SHARED ══════════════════════════════════════════════ */
+.s-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3rem;flex-wrap:wrap;gap:1rem;}
+.view-all{display:inline-flex;align-items:center;gap:.35rem;font-size:.875rem;font-weight:600;color:var(--sage);background:none;border:none;border-bottom:1.5px solid var(--sage-md);padding-bottom:2px;cursor:pointer;transition:gap .25s;}
+.view-all:hover{gap:.7rem;}
+
+/* ══ FEATURED ════════════════════════════════════════════════════ */
+#featured{padding:7rem 0 5rem;}
+.fg{display:grid;grid-template-columns:1.1fr .9fr;grid-template-rows:auto auto;gap:1.25rem;}
+.pc{background:var(--off);border-radius:var(--r-xl);overflow:hidden;position:relative;transition:transform .4s var(--ease),box-shadow .4s;cursor:pointer;display:block;color:inherit;text-decoration:none;}
+.pc:hover{transform:translateY(-5px);box-shadow:0 26px 52px rgba(0,0,0,.1);}
+.pc--tall{grid-row:1/3;}
+.pi{width:100%;aspect-ratio:4/3;overflow:hidden;position:relative;}
+.pc--tall .pi{aspect-ratio:unset;height:430px;}
+.pii{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;opacity:.62;transition:transform .6s var(--ease);}
+.pc:hover .pii{transform:scale(1.05);}
+.ga{background:linear-gradient(135deg,#c8d9c6,#a8c4a4);}
+.gb{background:linear-gradient(135deg,#d4c8e0,#b8a8cc);}
+.gc{background:linear-gradient(135deg,#d9d4c8,#c4bca8);}
+.gd{background:linear-gradient(135deg,#c8d4d9,#a8bcc4);}
+.ge{background:linear-gradient(135deg,#d9c8c8,#c4a8a8);}
+.gf{background:linear-gradient(135deg,#c8d9d4,#a8c4be);}
+.gg{background:linear-gradient(135deg,#d9d9c8,#c4c4a8);}
+.gh{background:linear-gradient(135deg,#c8ccd9,#a8acc4);}
+.pbadge{position:absolute;top:1rem;left:1rem;font-size:.67rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.28rem .75rem;border-radius:var(--r-pill);}
+.bn{background:rgba(74,103,65,.9);color:#fff;}
+.bh{background:rgba(201,123,106,.9);color:#fff;}
+.bs{background:rgba(232,168,48,.9);color:#fff;}
+.bl{background:rgba(26,28,24,.85);color:#fff;}
+.save-btn{position:absolute;top:1rem;right:1rem;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,transform .2s;font-size:.95rem;}
+.save-btn:hover{background:var(--white);transform:scale(1.1);}
+.save-btn.saved{background:#ffe8e8;}
+.pb{padding:1.4rem;}
+.pp{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.04em;margin-bottom:.2rem;}
+.pc--tall .pp{font-size:1.9rem;}
+.pn{font-size:.95rem;font-weight:600;margin-bottom:.2rem;}
+.pl{font-size:.76rem;color:var(--ink-60);display:flex;align-items:center;gap:.3rem;margin-bottom:.9rem;}
+.pchips{display:flex;gap:.4rem;flex-wrap:wrap;}
+.chip{display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:500;color:var(--ink-60);background:var(--white);border:1px solid var(--stone);padding:.25rem .6rem;border-radius:var(--r-pill);}
+
+/* ══ LISTINGS ════════════════════════════════════════════════════ */
+#listings{padding:5rem 0 7rem;background:var(--off);}
+.lhead{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+.frow{display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:2.25rem;}
+.fp{font-size:.8rem;font-weight:600;padding:.45rem 1.05rem;border-radius:var(--r-pill);border:1.5px solid var(--stone);background:var(--white);color:var(--ink-60);cursor:pointer;transition:all .2s;}
+.fp:hover{border-color:var(--sage);color:var(--sage);}
+.fp.on{background:var(--sage);color:var(--white);border-color:var(--sage);}
+.sort-sel{font-family:'Manrope',sans-serif;font-size:.8rem;font-weight:600;padding:.45rem 1rem;border-radius:var(--r-pill);border:1.5px solid var(--stone);background:var(--white);color:var(--ink);cursor:pointer;outline:none;}
+.lg{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
+.lc{background:var(--white);border-radius:var(--r-lg);overflow:hidden;transition:transform .4s var(--ease),box-shadow .4s;cursor:pointer;display:flex;flex-direction:column;}
+.lc:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.09);}
+.li{aspect-ratio:16/10;overflow:hidden;position:relative;}
+.lii{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;opacity:.62;transition:transform .5s var(--ease);}
+.lc:hover .lii{transform:scale(1.05);}
+.lb{padding:1.1rem;flex:1;display:flex;flex-direction:column;}
+.lpr{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.18rem;}
+.ln{font-size:.85rem;font-weight:600;margin-bottom:.15rem;}
+.ll{font-size:.74rem;color:var(--ink-60);margin-bottom:.75rem;}
+.lchips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:auto;}
+.lch{font-size:.7rem;font-weight:500;color:var(--ink-60);background:var(--off);padding:.22rem .55rem;border-radius:var(--r-pill);}
+.load-more-wrap{display:flex;justify-content:center;margin-top:2.75rem;}
+
+/* ══ STATS ══════════════════════════════════════════════════════ */
+#stats{background:var(--ink);padding:5rem 0;}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;text-align:center;}
+.sn{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,4vw,3.6rem);font-weight:800;letter-spacing:-.04em;color:var(--white);display:block;line-height:1;margin-bottom:.4rem;}
+.sn span{color:var(--sage-md);}
+.sl{font-size:.76rem;color:rgba(255,255,255,.4);letter-spacing:.05em;}
+
+/* ══ HOW ══════════════════════════════════════════════════════════ */
+#how{padding:8rem 0;}
+.how-c{text-align:center;margin-bottom:5rem;}
+.how-g{display:grid;grid-template-columns:repeat(3,1fr);gap:3rem;}
+.how-step{text-align:center;}
+.step-ico{width:68px;height:68px;border-radius:var(--r-lg);background:var(--sage-lt);display:flex;align-items:center;justify-content:center;font-size:1.65rem;margin:0 auto 1.35rem;}
+.step-n{font-family:'Syne',sans-serif;font-size:.67rem;font-weight:800;letter-spacing:.15em;color:var(--sage-md);margin-bottom:.4rem;display:block;}
+.step-t{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.6rem;}
+.step-d{font-size:.875rem;line-height:1.72;color:var(--ink-60);}
+
+/* ══ TESTIMONIALS ═══════════════════════════════════════════════ */
+#testi{background:var(--off);padding:8rem 0;}
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
+.tc{background:var(--white);border-radius:var(--r-xl);padding:1.85rem;display:flex;flex-direction:column;gap:1.15rem;}
+.ts{color:var(--sun);font-size:.875rem;letter-spacing:.08em;}
+.tq{font-family:'Instrument Serif',serif;font-size:1.1rem;font-style:italic;line-height:1.62;color:var(--ink);flex:1;}
+.ta{display:flex;align-items:center;gap:.8rem;}
+.tav{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.av1{background:#e8efe7;} .av2{background:#efe8e8;} .av3{background:#e8eaef;}
+.tn{font-size:.85rem;font-weight:600;}
+.tm{font-size:.72rem;color:var(--ink-60);margin-top:1px;}
+
+/* ══ CTA BAND ════════════════════════════════════════════════════ */
+#cta-band{background:var(--sage);padding:7rem 0;position:relative;overflow:hidden;}
+#cta-band::before{content:'';position:absolute;top:-60%;right:-10%;width:550px;height:550px;border-radius:50%;background:rgba(255,255,255,.06);}
+#cta-band::after{content:'';position:absolute;bottom:-50%;left:-8%;width:380px;height:380px;border-radius:50%;background:rgba(0,0,0,.06);}
+.cta-in{text-align:center;position:relative;z-index:1;max-width:660px;margin:0 auto;}
+.cta-in .section-h{color:var(--white);}
+.cta-in .section-h em{color:rgba(255,255,255,.6);}
+.cta-in p{color:rgba(255,255,255,.72);font-size:.95rem;line-height:1.72;margin:1.35rem 0 2.25rem;}
+.btn-white{display:inline-flex;align-items:center;gap:.5rem;background:var(--white);color:var(--sage);font-family:'Manrope',sans-serif;font-size:.9rem;font-weight:700;padding:.95rem 2.5rem;border-radius:var(--r-pill);border:none;cursor:pointer;transition:background .25s,transform .2s,box-shadow .2s;}
+.btn-white:hover{background:var(--off);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.15);}
+
+/* ══ FOOTER ══════════════════════════════════════════════════════ */
+footer{background:var(--ink);padding:5rem 0 2.5rem;color:rgba(255,255,255,.55);}
+.fg2{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:4rem;}
+.flogo{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;letter-spacing:-.04em;color:var(--white);margin-bottom:.85rem;display:block;cursor:pointer;}
+.flogo span{color:var(--sage-md);}
+.fb p{font-size:.85rem;line-height:1.72;max-width:230px;}
+.fc2 h4{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:1.15rem;}
+.fc2 ul{list-style:none;display:flex;flex-direction:column;gap:.6rem;}
+.fc2 button{font-size:.85rem;color:rgba(255,255,255,.52);background:none;border:none;cursor:pointer;text-align:left;font-family:'Manrope',sans-serif;transition:color .2s;padding:0;}
+.fc2 button:hover{color:var(--white);}
+.fbot{border-top:1px solid rgba(255,255,255,.08);padding-top:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.fbot p{font-size:.74rem;color:rgba(255,255,255,.22);}
+.fsoc{display:flex;gap:1rem;}
+.fsoc a{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:rgba(255,255,255,.38);text-decoration:none;transition:all .2s;}
+.fsoc a:hover{border-color:var(--sage-md);color:var(--white);background:rgba(74,103,65,.3);}
+
+/* ══ SLIDE PANEL (for List / About / Careers / Contact / Sign In) ══ */
+.panel-overlay{position:fixed;inset:0;z-index:500;background:rgba(26,28,24,.45);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .38s;}
+.panel-overlay.open{opacity:1;pointer-events:all;}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--white);z-index:501;overflow-y:auto;transform:translateX(100%);transition:transform .45s var(--ease);box-shadow:-24px 0 60px rgba(0,0,0,.12);}
+.panel.open{transform:none;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:1.75rem 2rem 0;position:sticky;top:0;background:var(--white);z-index:2;border-bottom:1px solid var(--stone);padding-bottom:1.25rem;}
+.panel-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;letter-spacing:-.03em;}
+.panel-close{width:36px;height:36px;border-radius:50%;background:var(--off);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:background .2s;}
+.panel-close:hover{background:var(--stone);}
+.panel-body{padding:2rem;}
+
+/* Panel form styles */
+.pf-row{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.9rem;}
+.pf-group{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.9rem;}
+.pf-group label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-60);}
+.pf-group input,.pf-group select,.pf-group textarea{background:var(--off);border:1.5px solid var(--stone);color:var(--ink);padding:.78rem 1rem;border-radius:var(--r-md);font-family:'Manrope',sans-serif;font-size:.875rem;outline:none;transition:border-color .25s;width:100%;-webkit-appearance:none;}
+.pf-group input:focus,.pf-group select:focus,.pf-group textarea:focus{border-color:var(--sage);background:var(--white);}
+.pf-group textarea{resize:vertical;min-height:90px;}
+.pf-submit{width:100%;padding:1rem;font-size:.9rem;font-weight:700;margin-top:.5rem;justify-content:center;}
+.pf-note{font-size:.74rem;color:var(--ink-60);text-align:center;margin-top:.8rem;line-height:1.55;}
+
+/* Panel success */
+.p-success{display:none;text-align:center;padding:3rem 1rem;}
+.p-success .ico{font-size:3.5rem;margin-bottom:1rem;}
+.p-success h3{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:.75rem;}
+.p-success p{font-size:.875rem;color:var(--ink-60);line-height:1.7;}
+.p-success .btn-ink{margin:1.5rem auto 0;display:inline-flex;}
+
+/* About panel */
+.about-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.75rem 0;}
+.as-card{background:var(--off);border-radius:var(--r-lg);padding:1.25rem;text-align:center;}
+.as-num{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-.04em;color:var(--sage);display:block;line-height:1;}
+.as-lbl{font-size:.72rem;color:var(--ink-60);margin-top:.3rem;display:block;}
+.value-list{display:flex;flex-direction:column;gap:.85rem;margin:1.5rem 0;}
+.vl-item{display:flex;align-items:flex-start;gap:.9rem;padding:1rem;background:var(--off);border-radius:var(--r-md);}
+.vl-ico{font-size:1.25rem;flex-shrink:0;margin-top:2px;}
+.vl-t{font-weight:600;font-size:.9rem;margin-bottom:.25rem;}
+.vl-d{font-size:.8rem;color:var(--ink-60);line-height:1.62;}
+.team-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem;margin-top:1.5rem;}
+.tm-card{background:var(--off);border-radius:var(--r-lg);padding:1rem;display:flex;align-items:center;gap:.85rem;}
+.tm-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0;}
+.tma1{background:#e8efe7;} .tma2{background:#efe8e8;} .tma3{background:#e8eaef;} .tma4{background:#efede8;}
+.tm-n{font-size:.85rem;font-weight:600;line-height:1.2;}
+.tm-r{font-size:.72rem;color:var(--ink-60);}
+
+/* Careers panel */
+.perk-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin:1.5rem 0;}
+.perk{background:var(--off);border-radius:var(--r-lg);padding:1rem;}
+.perk .pi2{font-size:1.3rem;margin-bottom:.45rem;}
+.perk .pt{font-size:.82rem;font-weight:700;margin-bottom:.22rem;}
+.perk .pd{font-size:.74rem;color:var(--ink-60);line-height:1.55;}
+.job-list{display:flex;flex-direction:column;gap:.75rem;}
+.job{background:var(--off);border-radius:var(--r-lg);padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;border:1.5px solid transparent;transition:border-color .25s;cursor:pointer;}
+.job:hover{border-color:var(--sage);}
+.job-t{font-size:.9rem;font-weight:600;margin-bottom:.3rem;}
+.job-tags{display:flex;gap:.4rem;flex-wrap:wrap;}
+.jtag{font-size:.66rem;font-weight:600;padding:.18rem .55rem;border-radius:var(--r-pill);background:var(--sage-lt);color:var(--sage);}
+.jtag.loc{background:var(--white);color:var(--ink-60);}
+.jtag.typ{background:#fef3e2;color:#9a6f10;}
+.apply-btn{font-size:.78rem;font-weight:600;padding:.5rem 1.1rem;border-radius:var(--r-pill);background:var(--sage);color:var(--white);border:none;cursor:pointer;white-space:nowrap;transition:background .2s;}
+.apply-btn:hover{background:var(--sage-dk);}
+
+/* Apply sub-panel */
+.apply-form{display:none;background:var(--white);border:1.5px solid var(--stone);border-radius:var(--r-lg);padding:1.5rem;margin-top:1rem;}
+.apply-form.show{display:block;}
+.apply-form-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1rem;}
+.af-back{font-size:.8rem;color:var(--ink-60);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:.35rem;margin-bottom:1rem;padding:0;}
+.af-back:hover{color:var(--sage);}
+
+/* Sign in panel */
+.si-demo{background:var(--sage-lt);border-radius:var(--r-lg);padding:1.5rem;margin:1.5rem 0;}
+.si-demo h4{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:var(--sage);margin-bottom:.5rem;}
+.si-demo p{font-size:.82rem;color:var(--sage-dk);line-height:1.65;}
+.demo-badge{display:inline-flex;align-items:center;gap:.4rem;background:#fff3e0;color:#a07010;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .8rem;border-radius:var(--r-pill);margin-bottom:1.25rem;}
+
+/* ══ PROPERTY MODAL ══════════════════════════════════════════════ */
+.prop-overlay{position:fixed;inset:0;z-index:600;background:rgba(26,28,24,.5);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s;padding:1rem;}
+.prop-overlay.open{opacity:1;pointer-events:all;}
+.prop-modal{background:var(--white);border-radius:var(--r-xl);width:100%;max-width:600px;max-height:90svh;overflow-y:auto;transform:translateY(26px) scale(.97);transition:transform .4s var(--ease);position:relative;}
+.prop-overlay.open .prop-modal{transform:none;}
+.pm-img{width:100%;height:190px;display:flex;align-items:center;justify-content:center;font-size:3.5rem;opacity:.6;border-radius:var(--r-xl) var(--r-xl) 0 0;}
+.pm-body{padding:1.75rem;}
+.pm-close{position:absolute;top:1rem;right:1rem;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.pm-close:hover{background:var(--white);}
+.pm-price{font-family:'Syne',sans-serif;font-size:1.85rem;font-weight:800;letter-spacing:-.04em;margin-bottom:.2rem;}
+.pm-name{font-size:1rem;font-weight:600;margin-bottom:.22rem;}
+.pm-loc{font-size:.8rem;color:var(--ink-60);margin-bottom:1.2rem;}
+.pm-chips{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1.4rem;}
+.pm-chip{font-size:.78rem;font-weight:600;color:var(--ink);background:var(--off);padding:.35rem .8rem;border-radius:var(--r-pill);}
+.pm-desc{font-size:.875rem;line-height:1.76;color:var(--ink-60);margin-bottom:1.75rem;}
+.pm-acts{display:flex;gap:.75rem;flex-wrap:wrap;}
+.pm-act1{flex:1;min-width:130px;background:var(--sage);color:var(--white);border:none;border-radius:var(--r-pill);padding:.9rem 1rem;font-family:'Manrope',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;transition:background .25s;}
+.pm-act1:hover{background:var(--sage-dk);}
+.pm-act2{flex:1;min-width:120px;background:none;color:var(--ink);border:1.5px solid var(--stone);border-radius:var(--r-pill);padding:.9rem 1rem;font-family:'Manrope',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;transition:border-color .25s;}
+.pm-act2:hover{border-color:var(--sage);color:var(--sage);}
+
+/* ══ TOAST ═══════════════════════════════════════════════════════ */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:900;background:var(--ink);color:var(--white);padding:.85rem 1.4rem;border-radius:var(--r-lg);font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.55rem;transform:translateY(70px);opacity:0;transition:transform .4s var(--ease),opacity .4s;box-shadow:0 8px 28px rgba(0,0,0,.22);max-width:300px;}
+.toast.show{transform:none;opacity:1;}
+
+/* ══ RESPONSIVE ══════════════════════════════════════════════════ */
+@media(max-width:1024px){
+  nav{padding:1rem 1.5rem;}
+  nav.stuck{padding:.8rem 1.5rem;}
+  .nav-links,.nav-right{display:none;}
+  .hamburger{display:flex;}
+  #hero{grid-template-columns:1fr;min-height:auto;}
+  .hero-l{padding:9rem 1.5rem 3rem;}
+  .hero-r{display:none;}
+  .scroll-hint{display:none;}
+  .fg{grid-template-columns:1fr 1fr;}
+  .pc--tall{grid-row:auto;}
+  .pc--tall .pi{height:250px;}
+  .lg{grid-template-columns:1fr 1fr;}
+  .sg{grid-template-columns:1fr 1fr;gap:2rem;}
+  .how-g{grid-template-columns:1fr;gap:2rem;max-width:440px;margin:0 auto;}
+  .tg{grid-template-columns:1fr;}
+  .fg2{grid-template-columns:1fr 1fr;gap:2rem;}
+  .sb-inner{flex-direction:column;}
+  .sf{border-right:none;border-bottom:1.5px solid var(--stone);}
+  .sf:last-of-type{border-bottom:none;}
+  .sb-btn{border-radius:0 0 var(--r-lg) var(--r-lg);padding:1rem;justify-content:center;}
+  .pf-row{grid-template-columns:1fr;}
+  .about-stat-row{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:640px){
+  nav{padding:.9rem 1.1rem;}
+  .hero-l{padding:7.5rem 1.1rem 2.5rem;}
+  .hero-stats{gap:1.4rem;}
+  .container,.container--wide{padding:0 1.1rem;}
+  .fg,.lg{grid-template-columns:1fr;}
+  .pc--tall .pi{height:200px;}
+  .sg{grid-template-columns:1fr 1fr;}
+  .fg2{grid-template-columns:1fr;}
+  .fbot{flex-direction:column;align-items:flex-start;}
+  .tg{gap:.9rem;}
+  .panel{width:100%;}
+  .perk-grid{grid-template-columns:1fr;}
+  .team-mini{grid-template-columns:1fr;}
+  .about-stat-row{grid-template-columns:1fr;}
+  section,#featured,#listings,#how,#testi{padding:4rem 0;}
+  #cta-band{padding:4.5rem 0;}
+  footer{padding:3.5rem 0 2rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="ti">✓</span> <span id="tm"></span></div>
+
+<!-- SLIDE PANEL OVERLAY -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="panel-head">
+    <h2 class="panel-title" id="panelTitle"></h2>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
+<!-- PROPERTY MODAL -->
+<div class="prop-overlay" id="propOverlay" onclick="closePropModal(event)">
+  <div class="prop-modal">
+    <button class="pm-close" onclick="closePropDirect()">✕</button>
+    <div class="pm-img" id="pmImg"></div>
+    <div class="pm-body">
+      <p class="pm-price" id="pmPrice"></p>
+      <p class="pm-name" id="pmName"></p>
+      <p class="pm-loc" id="pmLoc"></p>
+      <div class="pm-chips" id="pmChips"></div>
+      <p class="pm-desc" id="pmDesc"></p>
+      <div class="pm-acts">
+        <button class="pm-act1" onclick="bookView()">📅 Book a Viewing</button>
+        <button class="pm-act2" onclick="contactAgt()">💬 Contact Agent</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <span class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">Haven<span>.</span></span>
+  <ul class="nav-links">
+    <li><button onclick="document.getElementById('featured').scrollIntoView({behavior:'smooth'})">Featured</button></li>
+    <li><button onclick="document.getElementById('listings').scrollIntoView({behavior:'smooth'})">Browse</button></li>
+    <li><button onclick="openPanel('how')">How it Works</button></li>
+    <li><button onclick="openPanel('about')">About</button></li>
+    <li><button onclick="openPanel('careers')">Careers</button></li>
+    <li><button onclick="openPanel('contact')">Contact</button></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn-nav-ghost" onclick="openPanel('list')">List a Property</button>
+    <button class="btn-nav-solid" onclick="openPanel('signin')">Sign In</button>
+  </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMob()"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mob-menu" id="mobMenu">
+  <button onclick="toggleMob();document.getElementById('featured').scrollIntoView({behavior:'smooth'})">Featured</button>
+  <button onclick="toggleMob();document.getElementById('listings').scrollIntoView({behavior:'smooth'})">Browse</button>
+  <button onclick="toggleMob();openPanel('about')">About</button>
+  <button onclick="toggleMob();openPanel('careers')">Careers</button>
+  <button onclick="toggleMob();openPanel('contact')">Contact</button>
+  <button class="mob-cta" onclick="toggleMob();openPanel('list')">List a Property</button>
+</div>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-l">
+    <div class="hero-tag">🏡 1,200+ Homes Listed This Month</div>
+    <h1 class="hero-h">Find where<br>life feels <em>right.</em></h1>
+    <p class="hero-p">Haven connects you with handpicked properties across the country. No noise, no pressure — just homes worth your time.</p>
+    <div class="hero-acts">
+      <button class="btn-ink" onclick="document.getElementById('listings').scrollIntoView({behavior:'smooth'})">
+        Browse Listings
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn-outline" onclick="openPanel('list')">List Your Property</button>
+    </div>
+    <div class="hero-stats">
+      <div><span class="hs-num">4.8k+</span><span class="hs-lbl">Active Listings</span></div>
+      <div><span class="hs-num">98%</span><span class="hs-lbl">Happy Buyers</span></div>
+      <div><span class="hs-num">12</span><span class="hs-lbl">Cities Covered</span></div>
+    </div>
+  </div>
+  <div class="hero-r">
+    <div class="hero-bg-img"><div class="icon">🏡</div><p>Your Dream Home Awaits</p></div>
+    <div class="float-card">
+      <p class="fc-label">Just Listed</p>
+      <p class="fc-price">₹2.4 Cr</p>
+      <p class="fc-addr">Whitefield, Bangalore</p>
+      <span class="fc-badge">3 BHK · 1,820 sqft</span>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="sw"></div><span>Scroll</span></div>
+</section>
+
+<!-- ══ SEARCH BAR ══════════════════════════════════════════════ -->
+<div class="sb-wrap">
+  <div class="container">
+    <div class="sb-inner">
+      <div class="sf">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <input type="text" id="sLoc" placeholder="City, neighbourhood, or pincode">
+      </div>
+      <div class="sf">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        <select id="sType"><option value="">Property Type</option><option>Apartment</option><option>Villa</option><option>House</option><option>Studio</option><option>Plot</option></select>
+      </div>
+      <div class="sf">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <select id="sBudget"><option value="">Budget</option><option>Under ₹50 L</option><option>₹50 L–₹1 Cr</option><option>₹1 Cr–₹2 Cr</option><option>₹2 Cr–₹5 Cr</option><option>₹5 Cr+</option></select>
+      </div>
+      <button class="sb-btn" onclick="doSearch()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg> Search
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FEATURED ═══════════════════════════════════════════════ -->
+<section id="featured">
+  <div class="container--wide">
+    <div class="s-head reveal">
+      <div><span class="eyebrow">Handpicked for you</span><h2 class="section-h">Featured <em>Properties</em></h2></div>
+      <button class="view-all" onclick="document.getElementById('listings').scrollIntoView({behavior:'smooth'})">View all listings →</button>
+    </div>
+    <div class="fg" id="featuredGrid"></div>
+  </div>
+</section>
+
+<!-- ══ ALL LISTINGS ═══════════════════════════════════════════ -->
+<section id="listings">
+  <div class="container--wide">
+    <div class="lhead reveal">
+      <div><span class="eyebrow">Browse</span><h2 class="section-h">All <em>Listings</em></h2></div>
+      <select class="sort-sel" onchange="sortListings(this.value)">
+        <option value="default">Sort: Featured</option>
+        <option value="price-asc">Price: Low → High</option>
+        <option value="price-desc">Price: High → Low</option>
+        <option value="newest">Newest First</option>
+        <option value="sqft">Largest First</option>
+      </select>
+    </div>
+    <div class="frow reveal" style="transition-delay:.1s">
+      <button class="fp on" data-f="all" onclick="filterL(this)">All</button>
+      <button class="fp" data-f="Apartment" onclick="filterL(this)">Apartment</button>
+      <button class="fp" data-f="Villa" onclick="filterL(this)">Villa</button>
+      <button class="fp" data-f="House" onclick="filterL(this)">House</button>
+      <button class="fp" data-f="Studio" onclick="filterL(this)">Studio</button>
+      <button class="fp" data-f="Plot" onclick="filterL(this)">Plot</button>
+    </div>
+    <div class="lg" id="listingsGrid"></div>
+    <div class="load-more-wrap"><button class="btn-outline" id="loadMoreBtn" onclick="loadMore()">Load More ↓</button></div>
+  </div>
+</section>
+
+<!-- ══ STATS ══════════════════════════════════════════════════ -->
+<section id="stats">
+  <div class="container">
+    <div class="sg">
+      <div class="reveal"><span class="sn" data-t="4800">0<span>+</span></span><span class="sl">Active Listings</span></div>
+      <div class="reveal" style="transition-delay:.1s"><span class="sn" data-t="98">0<span>%</span></span><span class="sl">Client Satisfaction</span></div>
+      <div class="reveal" style="transition-delay:.2s"><span class="sn" data-t="12">0</span><span class="sl">Cities Covered</span></div>
+      <div class="reveal" style="transition-delay:.3s"><span class="sn" data-t="2300">0<span>+</span></span><span class="sl">Homes Sold</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ═══════════════════════════════════════════ -->
+<section id="how">
+  <div class="container">
+    <div class="how-c reveal"><span class="eyebrow">Simple Process</span><h2 class="section-h">How <em>Haven</em> works</h2></div>
+    <div class="how-g">
+      <div class="how-step reveal"><div class="step-ico">🔍</div><span class="step-n">01</span><h3 class="step-t">Search & Filter</h3><p class="step-d">Smart search by location, budget, size, and type. Only relevant results — no junk, no spam.</p></div>
+      <div class="how-step reveal" style="transition-delay:.15s"><div class="step-ico">📅</div><span class="step-n">02</span><h3 class="step-t">Book a Viewing</h3><p class="step-d">Schedule virtual or in-person visits in seconds. Our agents work around your schedule.</p></div>
+      <div class="how-step reveal" style="transition-delay:.3s"><div class="step-ico">🤝</div><span class="step-n">03</span><h3 class="step-t">Move In</h3><p class="step-d">We handle paperwork, legals, and registration. You pick up the keys and start your new chapter.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS ════════════════════════════════════════════ -->
+<section id="testi">
+  <div class="container">
+    <div class="s-head reveal"><div><span class="eyebrow">From our clients</span><h2 class="section-h">Real stories, <em>real homes.</em></h2></div></div>
+    <div class="tg">
+      <div class="tc reveal"><div class="ts">★★★★★</div><p class="tq">"Haven made finding our first home feel exciting rather than stressful. We moved in within 6 weeks of browsing."</p><div class="ta"><div class="tav av1">😊</div><div><p class="tn">Priya & Rohan Sharma</p><p class="tm">3BHK in Whitefield · Mar 2025</p></div></div></div>
+      <div class="tc reveal" style="transition-delay:.12s"><div class="ts">★★★★★</div><p class="tq">"The agent was patient, honest, and knowledgeable. I never felt sold to. I felt genuinely guided."</p><div class="ta"><div class="tav av2">😄</div><div><p class="tn">Arjun Mehta</p><p class="tm">Villa in Baner, Pune · Jan 2025</p></div></div></div>
+      <div class="tc reveal" style="transition-delay:.24s"><div class="ts">★★★★★</div><p class="tq">"We listed our apartment and had three serious buyers within a week. Haven's network is impressive."</p><div class="ta"><div class="tav av3">🥰</div><div><p class="tn">Neha Kapoor</p><p class="tm">Sold 2BHK in Koramangala · Feb 2025</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ════════════════════════════════════════════════════ -->
+<section id="cta-band">
+  <div class="container">
+    <div class="cta-in reveal">
+      <span class="eyebrow" style="color:rgba(255,255,255,.55)">Ready?</span>
+      <h2 class="section-h">Your next home<br>is <em>waiting.</em></h2>
+      <p>Join thousands of happy homeowners. It starts with a single search.</p>
+      <button class="btn-white" onclick="document.getElementById('listings').scrollIntoView({behavior:'smooth'})">Start Searching 🏡</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══════════════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="fg2">
+      <div class="fb">
+        <span class="flogo" onclick="window.scrollTo({top:0,behavior:'smooth'})">Haven<span>.</span></span>
+        <p>A cleaner, smarter way to find your home. Connecting buyers, sellers & renters across India's top cities.</p>
+      </div>
+      <div class="fc2"><h4>Explore</h4><ul>
+        <li><button onclick="document.getElementById('featured').scrollIntoView({behavior:'smooth'})">Featured Homes</button></li>
+        <li><button onclick="document.getElementById('listings').scrollIntoView({behavior:'smooth'})">Browse All</button></li>
+        <li><button onclick="filterByType('Villa')">Villas</button></li>
+        <li><button onclick="filterByType('Apartment')">Apartments</button></li>
+        <li><button onclick="filterByType('Plot')">Plots</button></li>
+      </ul></div>
+      <div class="fc2"><h4>Company</h4><ul>
+        <li><button onclick="openPanel('about')">About Haven</button></li>
+        <li><button onclick="openPanel('careers')">Careers</button></li>
+        <li><button onclick="openPanel('contact')">Press & Media</button></li>
+        <li><button onclick="openPanel('contact')">Contact</button></li>
+      </ul></div>
+      <div class="fc2"><h4>Owners</h4><ul>
+        <li><button onclick="openPanel('list')">List a Property</button></li>
+        <li><button onclick="openPanel('list')">Sell with Haven</button></li>
+        <li><button onclick="openPanel('list')">Rent with Haven</button></li>
+        <li><button onclick="openPanel('contact')">Partner with Us</button></li>
+      </ul></div>
+    </div>
+    <div class="fbot">
+      <p>© 2025 Haven Realty Pvt. Ltd. · <span style="color:rgba(255,255,255,.28)">Portfolio demo by Vasu</span></p>
+      <div class="fsoc">
+        <a href="#">📸</a><a href="#">🐦</a><a href="#">💼</a><a href="#">▶</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── DATA ── */
+const PROPS = [
+  {id:1,name:'Skyline Terrace Apartment',loc:'Whitefield, Bangalore',price:'₹2.4 Cr',pv:24000000,type:'Apartment',beds:3,baths:2,sqft:1820,badge:'n',icon:'🏢',g:'ga',desc:'Spacious corner apartment on the 14th floor with panoramic city views. Modern kitchen, two balconies, 24/7 security and covered parking. Ready to move in.',featured:true,tall:true},
+  {id:2,name:'Serene Garden Villa',loc:'Baner, Pune',price:'₹4.1 Cr',pv:41000000,type:'Villa',beds:4,baths:3,sqft:3200,badge:'h',icon:'🏡',g:'gb',desc:"Architect-designed villa with private garden, home office, and chef's kitchen. Quiet gated community with club access, pool, and children's play area.",featured:true},
+  {id:3,name:'Studio on MG Road',loc:'MG Road, Bangalore',price:'₹68 L',pv:6800000,type:'Studio',beds:1,baths:1,sqft:540,badge:'s',icon:'🏠',g:'gc',desc:'Compact studio ideal for young professionals. Walking distance to metro, cafes, and coworking spaces.',featured:true},
+  {id:4,name:'Heritage Row House',loc:'Kalyani Nagar, Pune',price:'₹1.85 Cr',pv:18500000,type:'House',beds:3,baths:2,sqft:2100,badge:'',icon:'🏘️',g:'gd',desc:'Charming independent house with original tile floors and a private courtyard. Freshly renovated interiors with period-appropriate touches retained.'},
+  {id:5,name:'The Residences at Hebbal',loc:'Hebbal, Bangalore',price:'₹3.2 Cr',pv:32000000,type:'Apartment',beds:4,baths:3,sqft:2650,badge:'l',icon:'🏙️',g:'ge',desc:'Premium 4BHK in a landmark tower with concierge, rooftop pool, and business lounge. Interiors by award-winning studio.'},
+  {id:6,name:'Koramangala Corner Plot',loc:'Koramangala, Bangalore',price:'₹1.1 Cr',pv:11000000,type:'Plot',beds:0,baths:0,sqft:1200,badge:'n',icon:'🌿',g:'gf',desc:'Prime east-facing plot in a sought-after locality. BBMP approved, clear title, ready to build.'},
+  {id:7,name:'Lakeview Apartment',loc:'Powai, Mumbai',price:'₹2.9 Cr',pv:29000000,type:'Apartment',beds:2,baths:2,sqft:1340,badge:'',icon:'🌊',g:'gg',desc:'Bright 2BHK with unobstructed lake views from both bedrooms. Fully modular kitchen, Italian marble floors.'},
+  {id:8,name:'Hillside Family Villa',loc:'Lavasa, Pune',price:'₹5.5 Cr',pv:55000000,type:'Villa',beds:5,baths:4,sqft:4800,badge:'l',icon:'⛰️',g:'gh',desc:'Expansive villa across three levels. Private pool, barbecue deck, home theatre, and stunning valley views.'},
+  {id:9,name:"Artist's Loft Studio",loc:'Indiranagar, Bangalore',price:'₹74 L',pv:7400000,type:'Studio',beds:1,baths:1,sqft:620,badge:'n',icon:'🎨',g:'ga',desc:'Light-flooded studio with double-height ceilings, original brick walls, and a lofted sleeping area. Perfect for creatives.'},
+  {id:10,name:'Golf View Apartment',loc:'Domlur, Bangalore',price:'₹1.6 Cr',pv:16000000,type:'Apartment',beds:2,baths:2,sqft:1180,badge:'',icon:'🌳',g:'gb',desc:'Well-maintained 2BHK overlooking the golf course. Peaceful locality, great connectivity, strong rental potential.'},
+  {id:11,name:'Riverside Independent House',loc:'Khar, Mumbai',price:'₹3.8 Cr',pv:38000000,type:'House',beds:4,baths:3,sqft:2900,badge:'h',icon:'🌴',g:'gc',desc:'Stunning independent house 200m from the creek. Wraparound terrace, vintage wooden accents, private garage.'},
+  {id:12,name:'Farmhouse Plot',loc:'Devanahalli, Bangalore',price:'₹85 L',pv:8500000,type:'Plot',beds:0,baths:0,sqft:5400,badge:'',icon:'🌾',g:'gd',desc:'Large plot near the Devanahalli growth corridor. Peaceful and serene, with clear title documentation.'},
+];
+
+const JOBS = [
+  {title:'Senior Frontend Engineer',dept:'Engineering',loc:'Remote / Bangalore',type:'Full-time',desc:"We're looking for a skilled React engineer to lead our buyer-facing product. 4+ years experience required."},
+  {title:'Product Designer',dept:'Design',loc:'Bangalore',type:'Full-time',desc:"Own end-to-end design of Haven's mobile and web products. Strong Figma skills and product sense required."},
+  {title:'Real Estate Relationship Manager',dept:'Operations',loc:'Mumbai',type:'Full-time',desc:'Help sellers and buyers navigate their journey. Prior real estate or financial services experience preferred.'},
+  {title:'Growth Marketing Manager',dept:'Marketing',loc:'Remote',type:'Full-time',desc:'Drive organic and paid acquisition across digital channels. PropTech or marketplace experience ideal.'},
+  {title:'Data Analyst',dept:'Data',loc:'Bangalore',type:'Full-time',desc:'Turn rich property and user data into product insights. SQL + Python required.'},
+  {title:'Customer Support Specialist',dept:'Support',loc:'Remote',type:'Part-time',desc:'Be the friendly voice of Haven. Excellent communication skills required.'},
+];
+
+const GR = {ga:'#c8d9c6,#a8c4a4',gb:'#d4c8e0,#b8a8cc',gc:'#d9d4c8,#c4bca8',gd:'#c8d4d9,#a8bcc4',ge:'#d9c8c8,#c4a8a8',gf:'#c8d9d4,#a8c4be',gg:'#d9d9c8,#c4c4a8',gh:'#c8ccd9,#a8acc4'};
+const BL = {n:'✦ New',h:'🔥 Hot',s:'↓ Drop',l:'◆ Luxury'};
+const BC = {n:'bn',h:'bh',s:'bs',l:'bl'};
+
+let activeF='all', visCount=6, sortedP=[...PROPS];
+
+/* ── RENDER FEATURED ── */
+function renderFeatured(){
+  document.getElementById('featuredGrid').innerHTML = PROPS.filter(p=>p.featured).map((p,i)=>`
+    <div class="pc ${p.tall?'pc--tall':''} reveal" style="transition-delay:${i*.1}s" onclick="openPropModal(${p.id})">
+      <div class="pi"><div class="pii ${p.g}">${p.icon}</div>
+        ${p.badge?`<span class="pbadge ${BC[p.badge]}">${BL[p.badge]}</span>`:''}
+        <button class="save-btn" onclick="event.stopPropagation();toggleSave(this,${p.id})">♡</button>
+      </div>
+      <div class="pb">
+        <p class="pp">${p.price}</p><p class="pn">${p.name}</p>
+        <p class="pl">📍 ${p.loc}</p>
+        <div class="pchips">
+          ${p.beds?`<span class="chip">🛏 ${p.beds}B</span>`:''}
+          ${p.baths?`<span class="chip">🚿 ${p.baths}Ba</span>`:''}
+          <span class="chip">📐 ${p.sqft.toLocaleString()} sqft</span>
+          <span class="chip">${p.type}</span>
+        </div>
+      </div>
+    </div>`).join('');
+  reObs();
+}
+
+/* ── RENDER LISTINGS ── */
+function renderListings(){
+  const f = activeF==='all' ? sortedP : sortedP.filter(p=>p.type===activeF);
+  const vis = f.slice(0,visCount);
+  document.getElementById('listingsGrid').innerHTML = vis.map((p,i)=>`
+    <div class="lc reveal" style="transition-delay:${(i%3)*.08}s" onclick="openPropModal(${p.id})">
+      <div class="li">
+        <div class="lii ${p.g}">${p.icon}</div>
+        ${p.badge?`<span class="pbadge ${BC[p.badge]}" style="position:absolute;top:.75rem;left:.75rem">${BL[p.badge]}</span>`:''}
+      </div>
+      <div class="lb">
+        <p class="lpr">${p.price}</p><p class="ln">${p.name}</p>
+        <p class="ll">📍 ${p.loc}</p>
+        <div class="lchips">
+          ${p.beds?`<span class="lch">🛏 ${p.beds}B</span>`:''}
+          ${p.baths?`<span class="lch">🚿 ${p.baths}Ba</span>`:''}
+          <span class="lch">📐 ${p.sqft.toLocaleString()}</span>
+          <span class="lch">${p.type}</span>
+        </div>
+      </div>
+    </div>`).join('');
+  document.getElementById('loadMoreBtn').style.display = f.length > visCount ? 'inline-flex' : 'none';
+  reObs();
+}
+
+function filterL(btn){
+  document.querySelectorAll('.fp').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); activeF=btn.dataset.f; visCount=6; renderListings();
+}
+function filterByType(t){
+  activeF=t; visCount=6;
+  document.querySelectorAll('.fp').forEach(b=>b.classList.toggle('on',b.dataset.f===t));
+  renderListings();
+  document.getElementById('listings').scrollIntoView({behavior:'smooth'});
+}
+function sortListings(v){
+  const b=[...PROPS];
+  if(v==='price-asc') sortedP=b.sort((a,c)=>a.pv-c.pv);
+  else if(v==='price-desc') sortedP=b.sort((a,c)=>c.pv-a.pv);
+  else if(v==='newest') sortedP=b.sort((a,c)=>c.id-a.id);
+  else if(v==='sqft') sortedP=b.sort((a,c)=>c.sqft-a.sqft);
+  else sortedP=[...PROPS];
+  visCount=6; renderListings();
+}
+function loadMore(){ visCount+=3; renderListings(); }
+
+function doSearch(){
+  const t=document.getElementById('sType').value;
+  if(t){ filterByType(t); return; }
+  document.getElementById('listings').scrollIntoView({behavior:'smooth'});
+  showToast('🔍',`Searching${document.getElementById('sLoc').value?' in '+document.getElementById('sLoc').value:''}`);
+}
+
+/* ── PROPERTY MODAL ── */
+function openPropModal(id){
+  const p=PROPS.find(x=>x.id===id); if(!p) return;
+  document.getElementById('pmImg').style.background=`linear-gradient(135deg,${GR[p.g]})`;
+  document.getElementById('pmImg').innerHTML=`<span style="font-size:3.5rem;opacity:.6">${p.icon}</span>`;
+  document.getElementById('pmPrice').textContent=p.price;
+  document.getElementById('pmName').textContent=p.name;
+  document.getElementById('pmLoc').textContent='📍 '+p.loc;
+  document.getElementById('pmChips').innerHTML=[
+    p.beds?`<span class="pm-chip">🛏 ${p.beds} Bed${p.beds>1?'s':''}</span>`:'',
+    p.baths?`<span class="pm-chip">🚿 ${p.baths} Bath${p.baths>1?'s':''}</span>`:'',
+    `<span class="pm-chip">📐 ${p.sqft.toLocaleString()} sqft</span>`,
+    `<span class="pm-chip">${p.type}</span>`
+  ].join('');
+  document.getElementById('pmDesc').textContent=p.desc;
+  document.getElementById('propOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePropModal(e){ if(e.target===document.getElementById('propOverlay')) closePropDirect(); }
+function closePropDirect(){ document.getElementById('propOverlay').classList.remove('open'); document.body.style.overflow=''; }
+function bookView(){ closePropDirect(); showToast("📅","Viewing request sent! We'll confirm within 24hrs."); }
+function contactAgt(){ closePropDirect(); showToast('💬','Agent notified. Expect a call within 2 hours.'); }
+
+/* ── SAVE ── */
+function toggleSave(btn,id){
+  const s=btn.classList.toggle('saved');
+  btn.textContent=s?'♥':'♡';
+  showToast(s?'❤️':'🗑️',s?'Saved to favourites':'Removed from favourites');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PANEL SYSTEM
+══════════════════════════════════════════════════════════════ */
+function openPanel(type){
+  const titles={list:'List a Property',about:'About Haven',careers:'Careers',contact:'Contact Us',signin:'Sign In',how:'How Haven Works'};
+  document.getElementById('panelTitle').textContent=titles[type]||type;
+  document.getElementById('panelBody').innerHTML=getPanelHTML(type);
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(type==='careers') reObs();
+}
+function closePanel(){
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function getPanelHTML(type){
+  if(type==='list') return listHTML();
+  if(type==='about') return aboutHTML();
+  if(type==='careers') return careersHTML();
+  if(type==='contact') return contactHTML();
+  if(type==='signin') return signinHTML();
+  if(type==='how') return howHTML();
+  return '';
+}
+
+/* LIST A PROPERTY */
+function listHTML(){ return `
+  <div id="listFormWrap">
+    <p style="font-size:.875rem;line-height:1.75;color:var(--ink-60);margin-bottom:1.75rem">Fill in your property details below and our team will create a professional listing and get back to you within 24 hours — completely free.</p>
+    <div class="pf-row">
+      <div class="pf-group"><label>Your Name *</label><input id="lName" type="text" placeholder="Rajesh Verma"></div>
+      <div class="pf-group"><label>Phone *</label><input id="lPhone" type="tel" placeholder="+91 98765 43210"></div>
+    </div>
+    <div class="pf-group"><label>Email *</label><input id="lEmail" type="email" placeholder="rajesh@email.com"></div>
+    <div class="pf-row">
+      <div class="pf-group"><label>Property Type *</label>
+        <select id="lType"><option value="">Select</option><option>Apartment</option><option>Villa</option><option>Independent House</option><option>Studio</option><option>Plot</option><option>Commercial</option></select>
+      </div>
+      <div class="pf-group"><label>Purpose *</label>
+        <select id="lPurpose"><option value="">Sell or Rent?</option><option>Sell</option><option>Rent</option><option>Lease</option></select>
+      </div>
+    </div>
+    <div class="pf-group"><label>Full Address *</label><input id="lAddr" type="text" placeholder="14, Palm Grove Road, Indiranagar, Bangalore"></div>
+    <div class="pf-row">
+      <div class="pf-group"><label>Asking Price (₹) *</label><input id="lPrice" type="text" placeholder="e.g. 2,40,00,000"></div>
+      <div class="pf-group"><label>Area (sqft)</label><input id="lSqft" type="text" placeholder="e.g. 1820"></div>
+    </div>
+    <div class="pf-row">
+      <div class="pf-group"><label>Bedrooms</label>
+        <select id="lBeds"><option value="">Select</option><option>Studio</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select>
+      </div>
+      <div class="pf-group"><label>Bathrooms</label>
+        <select id="lBaths"><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4+</option></select>
+      </div>
+    </div>
+    <div class="pf-group"><label>Description</label><textarea id="lDesc" placeholder="What makes this property special? Views, renovations, nearby amenities..."></textarea></div>
+    <button class="btn-sage pf-submit" onclick="submitList()">Submit Listing →</button>
+    <p class="pf-note">Free to list. Our team reviews within 24 hours. No hidden fees.</p>
+  </div>
+  <div class="p-success" id="listSuccess">
+    <div class="ico">🎉</div>
+    <h3>Listing Submitted!</h3>
+    <p>We've received your property details and will contact you within 24 hours to verify and go live.</p>
+    <button class="btn-ink" onclick="openPanel('list')">Submit Another →</button>
+  </div>`; 
+}
+function submitList(){
+  const n=v('lName'),e=v('lEmail'),ph=v('lPhone'),t=v('lType'),pu=v('lPurpose'),a=v('lAddr'),pr=v('lPrice');
+  if(!n||!e||!ph||!t||!pu||!a||!pr){showToast('⚠️','Please fill in all required fields');return;}
+  const btn=document.querySelector('#listFormWrap .btn-sage');
+  btn.textContent='Submitting…';btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('listFormWrap').style.display='none';
+    document.getElementById('listSuccess').style.display='block';
+    showToast('🎉','Listing submitted!');
+  },1100);
+}
+
+/* ABOUT */
+function aboutHTML(){ return `
+  <div style="margin-bottom:1.75rem">
+    <p style="font-size:.95rem;line-height:1.78;color:var(--ink-60);margin-bottom:1rem">Haven was founded in 2021 by a team tired of confusing portals, pushy agents, and opaque pricing. We set out to build something different — a calm, honest place to find your next home.</p>
+    <p style="font-size:.875rem;line-height:1.78;color:var(--ink-60)">Today we operate in 12 Indian cities with over 4,800 active listings and a team of 160 people who genuinely care about where you live next.</p>
+  </div>
+  <div class="about-stat-row">
+    <div class="as-card"><span class="as-num">4.8k+</span><span class="as-lbl">Listings</span></div>
+    <div class="as-card"><span class="as-num">12</span><span class="as-lbl">Cities</span></div>
+    <div class="as-card"><span class="as-num">2,300+</span><span class="as-lbl">Homes Sold</span></div>
+  </div>
+  <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;letter-spacing:-.02em;margin-bottom:.85rem">What we stand for</h3>
+  <div class="value-list">
+    <div class="vl-item"><div class="vl-ico">🤝</div><div><p class="vl-t">Radical Honesty</p><p class="vl-d">No fake listings. No inflated prices. We tell buyers and sellers the truth, even when it's uncomfortable.</p></div></div>
+    <div class="vl-item"><div class="vl-ico">🌿</div><div><p class="vl-t">Human First</p><p class="vl-d">Every home search is personal. We train our agents to listen before they speak, and guide before they sell.</p></div></div>
+    <div class="vl-item"><div class="vl-ico">⚡</div><div><p class="vl-t">Move Faster</p><p class="vl-d">We've cut average time-to-close by 40%. Because waiting months to finalise a home you love is unnecessary.</p></div></div>
+  </div>
+  <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;letter-spacing:-.02em;margin:1.5rem 0 .85rem">The Team</h3>
+  <div class="team-mini">
+    <div class="tm-card"><div class="tm-av tma1">👨‍💼</div><div><p class="tm-n">Vikram Nair</p><p class="tm-r">Co-Founder & CEO</p></div></div>
+    <div class="tm-card"><div class="tm-av tma2">👩‍💻</div><div><p class="tm-n">Ananya Pillai</p><p class="tm-r">Co-Founder & CTO</p></div></div>
+    <div class="tm-card"><div class="tm-av tma3">👨‍🎨</div><div><p class="tm-n">Saurabh Joshi</p><p class="tm-r">Head of Design</p></div></div>
+    <div class="tm-card"><div class="tm-av tma4">👩‍🏫</div><div><p class="tm-n">Deepa Krishnan</p><p class="tm-r">Head of Operations</p></div></div>
+  </div>
+  <div style="margin-top:2rem;display:flex;gap:.75rem;flex-wrap:wrap">
+    <button class="btn-ink" onclick="openPanel('contact')">Get in Touch</button>
+    <button class="btn-outline" onclick="openPanel('careers')">Join Our Team</button>
+  </div>`; 
+}
+
+/* CAREERS */
+function careersHTML(){ return `
+  <p style="font-size:.875rem;line-height:1.75;color:var(--ink-60);margin-bottom:1.25rem">We're a small, high-trust team solving a genuinely hard problem. If you want ownership, impact, and a team that cares — you're in the right place.</p>
+  <div class="perk-grid">
+    <div class="perk"><div class="pi2">💰</div><div class="pt">Competitive Pay</div><div class="pd">Top-of-market salary and meaningful equity.</div></div>
+    <div class="perk"><div class="pi2">🌍</div><div class="pt">Work Anywhere</div><div class="pd">Fully remote-friendly with optional hubs.</div></div>
+    <div class="perk"><div class="pi2">📚</div><div class="pt">Learning Budget</div><div class="pd">₹60k/year for courses, books & conferences.</div></div>
+    <div class="perk"><div class="pi2">🏥</div><div class="pt">Full Health Cover</div><div class="pd">Health insurance for you and your family.</div></div>
+  </div>
+  <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:1rem">Open Roles</h3>
+  <div class="job-list" id="jobList">
+    ${JOBS.map((j,i)=>`
+    <div class="job" id="job${i}">
+      <div>
+        <p class="job-t">${j.title}</p>
+        <div class="job-tags">
+          <span class="jtag">${j.dept}</span>
+          <span class="jtag loc">📍 ${j.loc}</span>
+          <span class="jtag typ">${j.type}</span>
+        </div>
+      </div>
+      <button class="apply-btn" onclick="toggleApply(${i},'${j.title}')">Apply →</button>
+    </div>
+    <div class="apply-form" id="applyForm${i}">
+      <button class="af-back" onclick="toggleApply(${i},'')">← Back to jobs</button>
+      <p class="apply-form-title">Applying for: ${j.title}</p>
+      <div class="pf-group"><label>Full Name *</label><input id="an${i}" type="text" placeholder="Your name"></div>
+      <div class="pf-group"><label>Email *</label><input id="ae${i}" type="email" placeholder="your@email.com"></div>
+      <div class="pf-group"><label>LinkedIn / Portfolio</label><input id="al${i}" type="url" placeholder="https://linkedin.com/in/..."></div>
+      <div class="pf-group"><label>Why Haven? *</label><textarea id="aw${i}" rows="3" placeholder="Tell us why you're excited about this role..."></textarea></div>
+      <button class="btn-sage pf-submit" onclick="submitApply(${i},'${j.title}')">Submit Application →</button>
+    </div>`).join('')}
+  </div>
+  <div class="p-success" id="applySuccess" style="display:none">
+    <div class="ico">🎉</div>
+    <h3>Application Sent!</h3>
+    <p id="applySuccessMsg">We'll be in touch within 5 business days.</p>
+    <button class="btn-ink" onclick="openPanel('careers')">View More Roles →</button>
+  </div>`; 
+}
+function toggleApply(i,title){
+  const form=document.getElementById('applyForm'+i);
+  const isOpen=form.classList.contains('show');
+  document.querySelectorAll('.apply-form').forEach(f=>f.classList.remove('show'));
+  if(!isOpen&&title) form.classList.add('show');
+}
+function submitApply(i,title){
+  const n=v('an'+i),e=v('ae'+i),w=v('aw'+i);
+  if(!n||!e||!w){showToast('⚠️','Please fill in all required fields');return;}
+  const btn=document.querySelector('#applyForm'+i+' .btn-sage');
+  btn.textContent='Submitting…';btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('jobList').style.display='none';
+    document.getElementById('applySuccessMsg').textContent=`Thanks ${n}! We've received your application for ${title} and will reply to ${e} within 5 business days.`;
+    document.getElementById('applySuccess').style.display='block';
+    showToast('🎉','Application submitted!');
+  },1000);
+}
+
+/* CONTACT */
+function contactHTML(){ return `
+  <div id="contactFormWrap">
+    <div style="display:flex;flex-direction:column;gap:1.1rem;margin-bottom:2rem">
+      <div style="display:flex;align-items:flex-start;gap:.9rem">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--sage-lt);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">📧</div>
+        <div><p style="font-size:.85rem;font-weight:600;margin-bottom:.2rem">Email</p><p style="font-size:.8rem;color:var(--ink-60)">hello@havenrealty.in · support@havenrealty.in</p></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:.9rem">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--sage-lt);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">📞</div>
+        <div><p style="font-size:.85rem;font-weight:600;margin-bottom:.2rem">Phone</p><p style="font-size:.8rem;color:var(--ink-60)">+91 80 4567 8900 · Toll-free 1800-123-HAVEN</p></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:.9rem">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--sage-lt);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">📍</div>
+        <div><p style="font-size:.85rem;font-weight:600;margin-bottom:.2rem">Head Office</p><p style="font-size:.8rem;color:var(--ink-60)">12th Floor, Prestige Tower, MG Road, Bangalore 560001</p></div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--stone);padding-top:1.5rem;margin-bottom:1.5rem">
+      <p style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-60);margin-bottom:.85rem">Office Hours</p>
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--ink-60);padding:.32rem 0;border-bottom:1px solid var(--stone)"><span>Mon – Fri</span><span style="color:var(--ink);font-weight:500">9:00 AM – 7:00 PM</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--ink-60);padding:.32rem 0;border-bottom:1px solid var(--stone)"><span>Saturday</span><span style="color:var(--ink);font-weight:500">10:00 AM – 5:00 PM</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--ink-60);padding:.32rem 0"><span>Sunday</span><span style="color:var(--ink);font-weight:500">Closed</span></div>
+    </div>
+    <div class="pf-row">
+      <div class="pf-group"><label>First Name *</label><input id="cFirst" type="text" placeholder="Priya"></div>
+      <div class="pf-group"><label>Last Name *</label><input id="cLast" type="text" placeholder="Sharma"></div>
+    </div>
+    <div class="pf-group"><label>Email *</label><input id="cEmail" type="email" placeholder="priya@email.com"></div>
+    <div class="pf-group"><label>Topic</label>
+      <select id="cTopic"><option value="">What's this about?</option><option>Buying</option><option>Selling</option><option>Renting</option><option>Partnership</option><option>Press</option><option>General</option></select>
+    </div>
+    <div class="pf-group"><label>Message *</label><textarea id="cMsg" rows="4" placeholder="How can we help?"></textarea></div>
+    <button class="btn-sage pf-submit" onclick="submitContact()">Send Message →</button>
+  </div>
+  <div class="p-success" id="contactSuccess">
+    <div class="ico">💬</div>
+    <h3>Message Sent!</h3>
+    <p id="contactSuccessMsg">We'll reply within one business day.</p>
+    <button class="btn-ink" onclick="openPanel('contact')">Send Another →</button>
+  </div>`; 
+}
+function submitContact(){
+  const f=v('cFirst'),e=v('cEmail'),m=v('cMsg');
+  if(!f||!e||!m){showToast('⚠️','Please fill in all required fields');return;}
+  const btn=document.querySelector('#contactFormWrap .btn-sage');
+  btn.textContent='Sending…';btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('contactFormWrap').style.display='none';
+    document.getElementById('contactSuccessMsg').textContent=`Thanks ${f}! We've received your message and will reply to ${e} within one business day.`;
+    document.getElementById('contactSuccess').style.display='block';
+    showToast('✅','Message sent!');
+  },1000);
+}
+
+/* SIGN IN */
+function signinHTML(){ return `
+  <span class="demo-badge">⚠️ Demo Project</span>
+  <p style="font-size:.875rem;line-height:1.75;color:var(--ink-60);margin-bottom:1.25rem">This is a portfolio demonstration site. Sign In functionality has not been implemented in this demo version.</p>
+  <div class="si-demo">
+    <h4>🛠️ What production Sign In would include:</h4>
+    <p>JWT / OAuth authentication (Google, Apple), saved property searches, favourites sync across devices, viewing history, agent messaging inbox, and legal document management — all behind a secure, verified login.</p>
+  </div>
+  <button class="btn-ink pf-submit" onclick="closePanel()">← Back to Haven</button>
+  <button class="btn-outline pf-submit" style="margin-top:.75rem" onclick="openPanel('list')">List a Property Instead</button>`; 
+}
+
+/* HOW */
+function howHTML(){ return `
+  <div style="display:flex;flex-direction:column;gap:1.5rem;margin-top:.5rem">
+    <div style="display:flex;align-items:flex-start;gap:1rem"><div style="width:52px;height:52px;border-radius:14px;background:var(--sage-lt);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🔍</div><div><p style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.35rem">01 · Search & Filter</p><p style="font-size:.85rem;line-height:1.7;color:var(--ink-60)">Use our smart search to narrow down by location, budget, size, and property type. Only relevant results — no junk, no spam listings.</p></div></div>
+    <div style="display:flex;align-items:flex-start;gap:1rem"><div style="width:52px;height:52px;border-radius:14px;background:var(--sage-lt);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">📅</div><div><p style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.35rem">02 · Book a Viewing</p><p style="font-size:.85rem;line-height:1.7;color:var(--ink-60)">Schedule a virtual or in-person visit in seconds. Our agents are available 6 days a week and work around your schedule — not theirs.</p></div></div>
+    <div style="display:flex;align-items:flex-start;gap:1rem"><div style="width:52px;height:52px;border-radius:14px;background:var(--sage-lt);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">📝</div><div><p style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.35rem">03 · Make an Offer</p><p style="font-size:.85rem;line-height:1.7;color:var(--ink-60)">When you find the right home, our team guides you through negotiation, pricing strategy, and making a competitive offer.</p></div></div>
+    <div style="display:flex;align-items:flex-start;gap:1rem"><div style="width:52px;height:52px;border-radius:14px;background:var(--sage-lt);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🤝</div><div><p style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.35rem">04 · Move In</p><p style="font-size:.85rem;line-height:1.7;color:var(--ink-60)">We handle all the paperwork, legals, and registration. You just pick up the keys and start your new chapter.</p></div></div>
+  </div>
+  <div style="margin-top:2rem;display:flex;gap:.75rem;flex-wrap:wrap">
+    <button class="btn-ink" onclick="document.getElementById('listings').scrollIntoView({behavior:'smooth'});closePanel()">Browse Listings</button>
+    <button class="btn-outline" onclick="openPanel('contact')">Speak to an Agent</button>
+  </div>`; 
+}
+
+/* ── NAV ── */
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('stuck',window.scrollY>60));
+function toggleMob(){
+  document.getElementById('hamburger').classList.toggle('open');
+  document.getElementById('mobMenu').classList.toggle('open');
+  document.body.style.overflow=document.getElementById('mobMenu').classList.contains('open')?'hidden':'';
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closePropDirect(); closePanel(); }
+});
+
+/* ── HELPERS ── */
+function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+
+/* ── TOAST ── */
+let toastT;
+function showToast(icon,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('ti').textContent=icon;
+  document.getElementById('tm').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ── SCROLL REVEAL ── */
+const rObs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in');}),{threshold:.1});
+function reObs(){ document.querySelectorAll('.reveal:not(.in)').forEach(el=>rObs.observe(el)); }
+reObs();
+
+/* ── COUNT UP ── */
+const cObs=new IntersectionObserver(e=>e.forEach(x=>{
+  if(!x.isIntersecting) return;
+  const el=x.target,tgt=parseInt(el.dataset.t),sfx=el.querySelector('span')?el.querySelector('span').outerHTML:'';
+  let v2=0; const step=tgt/60;
+  const t=setInterval(()=>{ v2=Math.min(v2+step,tgt); el.innerHTML=Math.floor(v2).toLocaleString('en-IN')+sfx; if(v2>=tgt)clearInterval(t); },20);
+  cObs.unobserve(el);
+}),{threshold:.5});
+document.querySelectorAll('.sn[data-t]').forEach(el=>cObs.observe(el));
+
+/* ── INIT ── */
+renderFeatured();
+renderListings();
+</script>
+</body>
+</html>
