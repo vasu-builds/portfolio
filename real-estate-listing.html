@@ -86,10 +86,11 @@ nav.stuck{background:rgba(255,255,255,.96);backdrop-filter:blur(14px);box-shadow
 .hero-stats{display:flex;gap:2.5rem;margin-top:4rem;padding-top:2rem;border-top:1px solid var(--stone);animation:fadeUp .8s .55s var(--ease) both;flex-wrap:wrap;}
 .hs-num{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;letter-spacing:-.04em;display:block;line-height:1;}
 .hs-lbl{font-size:.74rem;color:var(--ink-60);margin-top:.25rem;display:block;}
-.hero-r{position:relative;overflow:visible;animation:fadeIn 1s .15s var(--ease) both;}
+.hero-r{position:relative;overflow:hidden;animation:fadeIn 1s .15s var(--ease) both;}
 .hero-bg-img{width:100%;height:100%;background:linear-gradient(160deg,#c8d9c6,#a8c4a4 45%,#d4e4d2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;}
 .hero-bg-img .icon{font-size:5.5rem;opacity:.38;}
 .hero-bg-img p{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(0,0,0,.25);}
+
 .fc-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-60);margin-bottom:.4rem;}
 .fc-price{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;letter-spacing:-.03em;}
 .fc-addr{font-size:.74rem;color:var(--ink-60);margin-top:.15rem;}
@@ -101,7 +102,8 @@ nav.stuck{background:rgba(255,255,255,.96);backdrop-filter:blur(14px);box-shadow
 .scroll-hint span{font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-30);}
 
 /* ══ SEARCH BAR ══════════════════════════════════════════════════ */
-.sb-wrap{background:var(--white);position:sticky;top:68px;z-index:100;box-shadow:0 2px 0 var(--stone);}
+.sb-wrap{background:var(--white);position:sticky;top:68px;z-index:100;box-shadow:0 2px 0 var(--stone);transition:transform .4s var(--ease),opacity .4s;}
+.sb-wrap.hide-mobile{transform:translateY(-120%);opacity:0;pointer-events:none;}
 .sb-inner{display:flex;align-items:stretch;border:1.5px solid var(--stone);border-radius:var(--r-lg);overflow:hidden;margin:1.1rem auto;max-width:900px;background:var(--white);transition:box-shadow .3s;}
 .sb-inner:focus-within{box-shadow:0 0 0 3px rgba(74,103,65,.14);border-color:var(--sage);}
 .sf{flex:1;display:flex;align-items:center;gap:.55rem;padding:0 1.1rem;border-right:1.5px solid var(--stone);min-width:0;}
@@ -1000,8 +1002,20 @@ function howHTML(){ return `
   </div>`; 
 }
 
-/* ── NAV ── */
-window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('stuck',window.scrollY>60));
+/* ── NAV & SEARCH BAR SCROLL ── */
+let lastScroll=0;
+window.addEventListener('scroll',()=>{
+  const curr=window.scrollY;
+  document.getElementById('navbar').classList.toggle('stuck',curr>60);
+  
+  // Hide search bar on mobile when scrolling down (only on mobile)
+  if(window.innerWidth<=1024){
+    const sb=document.querySelector('.sb-wrap');
+    if(curr>200 && curr>lastScroll){ sb.classList.add('hide-mobile'); }
+    else{ sb.classList.remove('hide-mobile'); }
+  }
+  lastScroll=curr;
+});
 function toggleMob(){
   document.getElementById('hamburger').classList.toggle('open');
   document.getElementById('mobMenu').classList.toggle('open');
